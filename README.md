@@ -1,4 +1,5 @@
 # Pragya Chakshu (प्रज्ञा चक्षु)
+
 ### Controlled Cybersecurity Research, Attribution & Forensic Intelligence Workstation
 
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.128-009688.svg?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
@@ -8,7 +9,7 @@
 [![SQLite / Neo4j](https://img.shields.io/badge/Graph%20%26%20Relational-Dual--Engine-4F46E5.svg)](https://neo4j.com)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776AB.svg?logo=python&logoColor=white)](https://python.org)
 
-**Pragya Chakshu** (*Sanskrit: "The Eye of Wisdom"*) is a controlled cybersecurity research and forensic investigation platform designed to analyze threat actor operations, cross-platform pseudonym continuity, longitudinal behavioral rhythms, and shared hosting infrastructure across historical darknet archives.
+**Pragya Chakshu** (_Sanskrit: "The Eye of Wisdom"_) is a controlled cybersecurity research and forensic investigation platform designed to analyze threat actor operations, cross-platform pseudonym continuity, longitudinal behavioral rhythms, and shared hosting infrastructure across historical darknet archives.
 
 The system integrates relational event storage, graph network analysis, natural language processing (NLP) stylometry, asynchronous time-cursor event replay, and cryptographic case dossier export into a dark-themed intelligence analyst workstation.
 
@@ -63,94 +64,103 @@ flowchart TD
 
 To prevent analytical bias, hallucination, and data contamination, every record, node, indicator, and relationship strictly enforces one of three provenance tags:
 
-| Provenance | Definition | Scope in System |
-| :--- | :--- | :--- |
-| **`RESEARCH`** | Authentic historical research archives from darknet markets and forums. | Forum posts, timestamps, marketplace vendor listings, PGP public keys, interaction edges, and ground-truth references. |
-| **`DERIVED`** | Algorithmic analytics, statistical models, and attribution hypotheses computed from research data. | Stylometric $K$ constants, diurnal histograms, multi-factor correlation scores, coordination strength %, and evaluation metrics. |
-| **`SYNTHETIC`** | Controlled, safely simulated infrastructure indicators. | Bulletproof hosting subnets, synthetic TLS certificates (JARM hashes), SSH host keys, and simulated hidden services. |
+| Provenance      | Definition                                                                                         | Scope in System                                                                                                                  |
+| :-------------- | :------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------- |
+| **`RESEARCH`**  | Authentic historical research archives from darknet markets and forums.                            | Forum posts, timestamps, marketplace vendor listings, PGP public keys, interaction edges, and ground-truth references.           |
+| **`DERIVED`**   | Algorithmic analytics, statistical models, and attribution hypotheses computed from research data. | Stylometric $K$ constants, diurnal histograms, multi-factor correlation scores, coordination strength %, and evaluation metrics. |
+| **`SYNTHETIC`** | Controlled, safely simulated infrastructure indicators.                                            | Bulletproof hosting subnets, synthetic TLS certificates (JARM hashes), SSH host keys, and simulated hidden services.             |
 
 ---
 
 ## ⚡ Core Capabilities
 
 ### 🌐 Capability 1: Controlled Synthetic Infrastructure Attribution
+
 Darknet operations route through Tor onion routing, which intentionally obscures origin server IPs and physical network topology. To demonstrate forensic infrastructure correlation safely without illegal active scanning:
-* Generates realistic bulletproof hosting netblocks, ASN pools, and synthetic origin servers.
-* Creates simulated TLS certificates with **JARM fingerprints** and SSH host keys (RSA/ED25519).
-* Implements **co-hosting correlation (`CO_HOSTED_SERVER`)**: detects distinct `.onion` services sharing identical TLS certificates or SSH keys pointing back to a single physical server node.
+
+- Generates realistic bulletproof hosting netblocks, ASN pools, and synthetic origin servers.
+- Creates simulated TLS certificates with **JARM fingerprints** and SSH host keys (RSA/ED25519).
+- Implements **co-hosting correlation (`CO_HOSTED_SERVER`)**: detects distinct `.onion` services sharing identical TLS certificates or SSH keys pointing back to a single physical server node.
 
 ### 👤 Capability 2: Actor Tracking, Profiling & Evaluation Mode
+
 Correlates pseudonymous actors across disparate forums and marketplaces:
-* **Authentic NLP Stylometry**:
-  * **Yule’s Characteristic Constant $K$**: Computes vocabulary richness and word-recurrence invariance:
+
+- **Authentic NLP Stylometry**:
+  - **Yule’s Characteristic Constant $K$**: Computes vocabulary richness and word-recurrence invariance:
     $$K = 10^4 \cdot \frac{\sum m^2 V_m - N}{N^2}$$
-  * **Lexical Diversity**: Type-Token Ratio (TTR) and word-length distributions.
-  * **Punctuation Vector**: Normalized frequencies of commas, periods, exclamation, semicolons, and ellipses.
-  * **Character 4-Grams**: Relative frequency distributions compared via cosine similarity.
-  * **Language Verification**: English verification using function words and letter distributions.
-* **Longitudinal Behavioral Profiling**:
-  * Constructs **24-hour diurnal posting histograms (UTC 0..23)** from post timestamps.
-  * Detects posting bursts ($\le 1\text{ hour}$), mean inactivity spans, and cadence.
-  * Measures temporal curve compatibility via diurnal cosine similarity; flags schedules differing by $\ge 8\text{ hours}$ as schedule conflicts.
-* **Multi-Factor Correlation Engine**:
-  * Evaluates candidate pairs across weighted evidence signals:
-    * Cryptographic PGP Key Match: **`+40.0`**
-    * Handle Lexical Continuity: **`+25.0`**
-    * NLP Stylometric Alignment: **`+25.0`** / Divergence: **`-20.0`**
-    * Diurnal Temporal Overlap: **`+15.0`** / Conflicting Schedules: **`-25.0`**
-    * Shared Crypto / Onion Indicators: **`+20.0`**
-* **Human-in-the-Loop Evidence Challenge Workflow**:
-  * Investigators can dispute specific evidence items (e.g., boilerplate greetings or shared VPNs).
-  * The backend dynamically recalculates the relationship score and updates the graph edge.
-  * Every challenge or restoration is permanently recorded in the `evidence_challenges` audit table.
-* **Evaluation Mode & Benchmark Dashboard**:
-  * Compares analytical attribution hypotheses against the hidden ground truth (`user-matching.tsv`).
-  * Calculates contingency metrics: **True Positives (TP)**, **False Positives (FP)**, **False Negatives (FN)**, **Precision %**, **Recall %**, and **$F_1$ Score**.
-  * Dynamic confidence threshold slider ($\tau \in [0, 100]$) to analyze precision-recall curves.
-  * **Strict Boundary:** Ground truth is isolated from Investigator Mode to prevent circular attribution.
+  - **Lexical Diversity**: Type-Token Ratio (TTR) and word-length distributions.
+  - **Punctuation Vector**: Normalized frequencies of commas, periods, exclamation, semicolons, and ellipses.
+  - **Character 4-Grams**: Relative frequency distributions compared via cosine similarity.
+  - **Language Verification**: English verification using function words and letter distributions.
+- **Longitudinal Behavioral Profiling**:
+  - Constructs **24-hour diurnal posting histograms (UTC 0..23)** from post timestamps.
+  - Detects posting bursts ($\le 1\text{ hour}$), mean inactivity spans, and cadence.
+  - Measures temporal curve compatibility via diurnal cosine similarity; flags schedules differing by $\ge 8\text{ hours}$ as schedule conflicts.
+- **Multi-Factor Correlation Engine**:
+  - Evaluates candidate pairs across weighted evidence signals:
+    - Cryptographic PGP Key Match: **`+40.0`**
+    - Handle Lexical Continuity: **`+25.0`**
+    - NLP Stylometric Alignment: **`+25.0`** / Divergence: **`-20.0`**
+    - Diurnal Temporal Overlap: **`+15.0`** / Conflicting Schedules: **`-25.0`**
+    - Shared Crypto / Onion Indicators: **`+20.0`**
+- **Human-in-the-Loop Evidence Challenge Workflow**:
+  - Investigators can dispute specific evidence items (e.g., boilerplate greetings or shared VPNs).
+  - The backend dynamically recalculates the relationship score and updates the graph edge.
+  - Every challenge or restoration is permanently recorded in the `evidence_challenges` audit table.
+- **Evaluation Mode & Benchmark Dashboard**:
+  - Compares analytical attribution hypotheses against the hidden ground truth (`user-matching.tsv`).
+  - Calculates contingency metrics: **True Positives (TP)**, **False Positives (FP)**, **False Negatives (FN)**, **Precision %**, **Recall %**, and **$F_1$ Score**.
+  - Dynamic confidence threshold slider ($\tau \in [0, 100]$) to analyze precision-recall curves.
+  - **Strict Boundary:** Ground truth is isolated from Investigator Mode to prevent circular attribution.
 
 ### 🤝 Capability 3: Coordinated Activity Discovery
+
 Identifies multi-actor collusion, astroturfing, and coordinated darknet campaigns:
-* Detects multi-persona thread co-participation across historical forum discussions.
-* Integrates interaction edge networks (`edges-2014-1.tsv`).
-* Analyzes response latency ($\Delta t$) and rapid reply cadences ($\Delta t < 60\text{s}$).
-* Categorizes coordination patterns: `HIGHLY_SYNCHRONIZED_CASCADE`, `FREQUENT_CO_PARTICIPATION`, and `OCCASIONAL_THREAD_INTERACTION`.
-* Renders dashed cyan `COORDINATED_WITH` edges showing coordination percentage.
+
+- Detects multi-persona thread co-participation across historical forum discussions.
+- Integrates interaction edge networks (`edges-2014-1.tsv`).
+- Analyzes response latency ($\Delta t$) and rapid reply cadences ($\Delta t < 60\text{s}$).
+- Categorizes coordination patterns: `HIGHLY_SYNCHRONIZED_CASCADE`, `FREQUENT_CO_PARTICIPATION`, and `OCCASIONAL_THREAD_INTERACTION`.
+- Renders dashed cyan `COORDINATED_WITH` edges showing coordination percentage.
 
 ---
 
 ## ⏱️ Time-Cursor Replay Engine (SSE)
 
 Pragya Chakshu features an asynchronous chronological replay engine:
-* State machine with `RUNNING`, `PAUSED`, and `STOPPED` playback states.
-* Configurable speed multipliers: **1x**, **5x**, **20x**, and **60x**.
-* Advances historical time cursor chronologically through authentic dataset timestamps (`timestamp_occurred`).
-* Emits real-time Server-Sent Events (`GET /api/cases/{case_id}/replay/stream`) to update the live graph canvas and event feed without polling.
+
+- State machine with `RUNNING`, `PAUSED`, and `STOPPED` playback states.
+- Configurable speed multipliers: **1x**, **5x**, **20x**, and **60x**.
+- Advances historical time cursor chronologically through authentic dataset timestamps (`timestamp_occurred`).
+- Emits real-time Server-Sent Events (`GET /api/cases/{case_id}/replay/stream`) to update the live graph canvas and event feed without polling.
 
 ---
 
 ## 📜 Forensic Case Dossier & Cryptographic Seal
 
 Case documentation is exportable in two formats:
-* **Printable Forensic HTML Dossier (`GET /api/cases/{case_id}/export/dossier`)**: Formatted for print or PDF generation, featuring case summary, chain of custody logs, complete evidence inventory, human challenge audit history, and provenance breakdown.
-* **Structured JSON Export (`GET /api/cases/{case_id}/export/json`)**: Machine-readable dossier.
-* **Digital SHA-256 Seal**: The entire case state is serialized and hashed with SHA-256 to create an immutable cryptographic fingerprint locking the forensic state at the time of export.
+
+- **Printable Forensic HTML Dossier (`GET /api/cases/{case_id}/export/dossier`)**: Formatted for print or PDF generation, featuring case summary, chain of custody logs, complete evidence inventory, human challenge audit history, and provenance breakdown.
+- **Structured JSON Export (`GET /api/cases/{case_id}/export/json`)**: Machine-readable dossier.
+- **Digital SHA-256 Seal**: The entire case state is serialized and hashed with SHA-256 to create an immutable cryptographic fingerprint locking the forensic state at the time of export.
 
 ---
 
 ## 🎨 Interactive Graph Canvas
 
 The Cytoscape-powered graph canvas is engineered for high readability and eliminates hairball clutter:
-* **View Presets**:
-  * 🎯 **Core Investigation**: Focuses on Personas, Active Correlations, Coordination, Identifiers, and Infrastructure. Automatically filters out raw message boxes and structural `PART_OF` lines.
-  * 👥 **Actor Attribution**: Focuses strictly on cross-platform identity links (`CORRELATED_WITH`) and PGP/BTC keys.
-  * ⚡ **Coordinated Activity**: Displays coordinated posting cliques and latency links.
-  * 🌐 **Infrastructure**: Displays physical servers, JARM TLS certificates, and Tor hidden services.
-  * 📦 **Full Raw**: Unfiltered forensic topology.
-* **Interactive Neighborhood Spotlight**: Clicking or hovering any node or edge dims all unrelated elements to **10% opacity**, isolating that entity's direct network.
-* **Live Search & Locate**: Auto-pans and zooms to any persona handle, IP address, or onion URL.
-* **Layout Switcher**: Force-Directed (Spaced CoSE with collision avoidance), Concentric (degree rings), Hierarchical Tree, and Circular layouts.
-* **Interactive Legend**: Floating guide explaining entity colors and relationship line styles.
+
+- **View Presets**:
+  - 🎯 **Core Investigation**: Focuses on Personas, Active Correlations, Coordination, Identifiers, and Infrastructure. Automatically filters out raw message boxes and structural `PART_OF` lines.
+  - 👥 **Actor Attribution**: Focuses strictly on cross-platform identity links (`CORRELATED_WITH`) and PGP/BTC keys.
+  - ⚡ **Coordinated Activity**: Displays coordinated posting cliques and latency links.
+  - 🌐 **Infrastructure**: Displays physical servers, JARM TLS certificates, and Tor hidden services.
+  - 📦 **Full Raw**: Unfiltered forensic topology.
+- **Interactive Neighborhood Spotlight**: Clicking or hovering any node or edge dims all unrelated elements to **10% opacity**, isolating that entity's direct network.
+- **Live Search & Locate**: Auto-pans and zooms to any persona handle, IP address, or onion URL.
+- **Layout Switcher**: Force-Directed (Spaced CoSE with collision avoidance), Concentric (degree rings), Hierarchical Tree, and Circular layouts.
+- **Interactive Legend**: Floating guide explaining entity colors and relationship line styles.
 
 ---
 
@@ -224,18 +234,22 @@ c:/projects/PC/
 ## 🚀 Quickstart & Setup Guide
 
 ### Prerequisites
-* **Python 3.10+**
-* **Node.js 18+** and `npm`
-* *(Optional)* **Neo4j 5.0+** (The system automatically activates a persistent NetworkX JSON fallback if Neo4j is offline).
+
+- **Python 3.10+**
+- **Node.js 18+** and `npm`
+- _(Optional)_ **Neo4j 5.0+** (The system automatically activates a persistent NetworkX JSON fallback if Neo4j is offline).
 
 ### 1. Clone the Repository
+
 ```bash
 git clone https://github.com/Sneha07k/Pragya-Chakshu.git
 cd Pragya-Chakshu
 ```
 
 ### 2. Backend Setup
+
 Create and activate a virtual environment, install requirements, and launch the API server:
+
 ```bash
 # Windows (PowerShell)
 python -m venv .venv
@@ -245,16 +259,20 @@ pip install -r backend/requirements.txt
 # Start Backend (Port 8000)
 python -m backend.run
 ```
-* Backend API documentation will be available at: **`http://localhost:8000/docs`**
+
+- Backend API documentation will be available at: **`http://localhost:8000/docs`**
 
 ### 3. Frontend Setup
+
 In a separate terminal, install node dependencies and launch the Vite development server:
+
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
-* Open your browser at: **`http://localhost:5173`**
+
+- Open your browser at: **`http://localhost:5173`**
 
 ---
 
@@ -280,7 +298,8 @@ python scratch/test_phase9.py
 
 ## ⚖️ Ethical Boundary & Research Disclaimer
 
-* **No Live Crawling**: Pragya Chakshu does not crawl, scan, probe, or connect to active darknet hidden services or live external networks.
-* **Controlled Demonstration**: Infrastructure indicators for Capability 1 are synthetically simulated with explicit `SYNTHETIC` provenance tags.
-* **Analytical Hypotheses**: Persona correlation scores reflect mathematical statistical alignment across available signals. They represent investigative hypotheses and do not constitute proof of real-world legal identity.
+- **No Live Crawling**: Pragya Chakshu does not crawl, scan, probe, or connect to active darknet hidden services or live external networks.
+- **Controlled Demonstration**: Infrastructure indicators for Capability 1 are synthetically simulated with explicit `SYNTHETIC` provenance tags.
+- **Analytical Hypotheses**: Persona correlation scores reflect mathematical statistical alignment across available signals. They represent investigative hypotheses and do not constitute proof of real-world legal identity.
+
 
