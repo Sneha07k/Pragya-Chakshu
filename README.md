@@ -284,7 +284,3 @@ python scratch/test_phase9.py
 * **Controlled Demonstration**: Infrastructure indicators for Capability 1 are synthetically simulated with explicit `SYNTHETIC` provenance tags.
 * **Analytical Hypotheses**: Persona correlation scores reflect mathematical statistical alignment across available signals. They represent investigative hypotheses and do not constitute proof of real-world legal identity.
 
----
-
-## 📄 License
-This project is developed for educational, academic, and cybersecurity forensic research purposes. Released under the [MIT License](LICENSE).
