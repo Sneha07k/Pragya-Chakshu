@@ -19,42 +19,45 @@ The system integrates relational event storage, graph network analysis, natural 
 
 ```mermaid
 flowchart TD
-    subgraph INGESTION ["1. Streaming Ingestion & Normalization"]
-        D1[("forum/post.tsv<br/>(284 MB)")] --> A1[Forum Streaming Adapter]
-        D2[("market/vendors.tsv<br/>listings.tsv")] --> A2[Marketplace Adapter]
-        D3[("network/edges.tsv")] --> A3[Interaction Network Adapter]
-        A1 & A2 & A3 --> NORM[Event Normalizer<br/>Regex Extractor (PGP, BTC, .onion)]
+    subgraph INGESTION ["1. Streaming Ingestion and Normalization"]
+        D1[("forum/post.tsv (284 MB)")] --> A1["Forum Streaming Adapter"]
+        D2[("market/vendors.tsv & listings.tsv")] --> A2["Marketplace Adapter"]
+        D3[("network/edges.tsv")] --> A3["Interaction Network Adapter"]
+        A1 --> NORM["Event Normalizer & Regex Extractor (PGP, BTC, Onion)"]
+        A2 --> NORM
+        A3 --> NORM
     end
 
     subgraph STORAGE ["2. Dual-Engine Storage Layer"]
-        NORM --> SQLITE[("SQLite Database<br/>pragya_chakshu.db")]
-        NORM --> GRAPH[("Dual Graph Engine<br/>Neo4j / NetworkX Fallback")]
+        NORM --> SQLITE[("SQLite Database (pragya_chakshu.db)")]
+        NORM --> GRAPH[("Dual Graph Engine (Neo4j / NetworkX)")]
     end
 
     subgraph ANALYTICS ["3. Forensic Intelligence Engines"]
-        SQLITE --> STYLO["NLP Stylometry Engine<br/>(Yule's K, TTR, 4-grams, Punctuation)"]
-        SQLITE --> BEHAV["Behavioral Profiler<br/>(24h UTC Diurnal Rhythms, Cadence)"]
-        STYLO & BEHAV --> CORR["Multi-Factor Correlation Engine<br/>(PGP + Handle + Stylometry + Timing)"]
-        SQLITE --> COORD["Coordination Discovery<br/>(Reply Cadence Δt, Co-Posting Cliques)"]
-        CORR --> CHALLENGE["Human-in-the-Loop<br/>Evidence Challenge & Audit Log"]
+        SQLITE --> STYLO["NLP Stylometry Engine (Yule's K, TTR, 4-grams)"]
+        SQLITE --> BEHAV["Behavioral Profiler (24h UTC Diurnal Rhythms)"]
+        STYLO --> CORR["Multi-Factor Correlation Engine"]
+        BEHAV --> CORR
+        SQLITE --> COORD["Coordination Discovery (Reply Cadence, Cliques)"]
+        CORR --> CHALLENGE["Human-in-the-Loop Challenge & Audit Log"]
     end
 
     subgraph STREAMING ["4. Asynchronous Replay Engine"]
-        SQLITE --> REPLAY["Time-Cursor Replay State Machine<br/>(1x, 5x, 20x, 60x Multipliers)"]
-        REPLAY --> SSE["Server-Sent Events (SSE)<br/>/api/cases/{id}/replay/stream"]
+        SQLITE --> REPLAY["Time-Cursor Replay State Machine (1x to 60x)"]
+        REPLAY --> SSE["Server-Sent Events (/api/cases/{id}/replay/stream)"]
     end
 
     subgraph SYNTHETIC ["5. Controlled Infrastructure Simulation"]
-        SIM["Synthetic Infrastructure Generator<br/>(Bulletproof Hosts, JARM TLS, SSH Keys)"]
-        SIM -.->|PROVENANCE = SYNTHETIC| GRAPH
+        SIM["Synthetic Infrastructure Generator (Bulletproof Hosts, JARM)"]
+        SIM -.->|"PROVENANCE = SYNTHETIC"| GRAPH
     end
 
     subgraph FRONTEND ["6. Analyst Workstation UI (React 19 + Cytoscape.js)"]
-        GRAPH --> CYTO["Interactive Investigation Graph<br/>(Neighborhood Spotlight & Presets)"]
+        GRAPH --> CYTO["Interactive Investigation Graph Canvas"]
         SSE --> FEED["Live Chronological Feed"]
         CORR --> INSP["Evidence & Challenge Inspector"]
-        SQLITE --> EVAL["Evaluation Mode Dashboard<br/>(Precision, Recall, F1 Benchmarks)"]
-        SQLITE --> DOSSIER["Forensic Case Dossier & Export<br/>(SHA-256 Digital Fingerprint)"]
+        SQLITE --> EVAL["Evaluation Mode Dashboard (Precision, Recall, F1)"]
+        SQLITE --> DOSSIER["Forensic Case Dossier (SHA-256 Seal)"]
     end
 ```
 
@@ -301,5 +304,3 @@ python scratch/test_phase9.py
 - **No Live Crawling**: Pragya Chakshu does not crawl, scan, probe, or connect to active darknet hidden services or live external networks.
 - **Controlled Demonstration**: Infrastructure indicators for Capability 1 are synthetically simulated with explicit `SYNTHETIC` provenance tags.
 - **Analytical Hypotheses**: Persona correlation scores reflect mathematical statistical alignment across available signals. They represent investigative hypotheses and do not constitute proof of real-world legal identity.
-
-
