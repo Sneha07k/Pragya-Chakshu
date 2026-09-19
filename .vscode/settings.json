@@ -1,0 +1,29 @@
+{
+  "files.watcherExclude": {
+    "**/dataset/**": true,
+    "**/frontend/node_modules/**": true,
+    "**/frontend/dist/**": true,
+    "**/backend/data/**": true,
+    "**/.git/**": true
+  },
+  "search.exclude": {
+    "**/dataset/**": true,
+    "**/frontend/node_modules/**": true,
+    "**/frontend/dist/**": true
+  },
+  "files.exclude": {
+    "**/dataset/**": true,
+    "**/frontend/node_modules/**": true,
+    "**/frontend/dist/**": true
+  },
+  "python.analysis.exclude": [
+    "**/dataset/**",
+    "**/frontend/**",
+    "**/dist/**"
+  ],
+  "python.analysis.ignore": [
+    "**/dataset/**",
+    "**/frontend/**"
+  ],
+  "typescript.tsserver.maxTsServerMemory": 4096
+}
