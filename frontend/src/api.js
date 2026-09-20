@@ -207,4 +207,3 @@ export async function deleteCaseNote(caseId, noteId) {
   });
   return res.json();
 }
-

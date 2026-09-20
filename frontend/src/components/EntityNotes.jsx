@@ -66,7 +66,9 @@ export default function EntityNotes({
   return (
     <div
       className={`border rounded-xl p-3.5 space-y-3 ${
-        isDark ? "bg-slate-950/70 border-slate-800" : "bg-slate-50 border-slate-200"
+        isDark
+          ? "bg-slate-950/70 border-slate-800"
+          : "bg-slate-50 border-slate-200"
       }`}
     >
       <div className="flex items-center justify-between">
@@ -112,7 +114,9 @@ export default function EntityNotes({
 
       {/* Notes List */}
       {loading && notes.length === 0 ? (
-        <div className="text-[11px] opacity-60 text-center py-2">Loading notes...</div>
+        <div className="text-[11px] opacity-60 text-center py-2">
+          Loading notes...
+        </div>
       ) : notes.length === 0 ? (
         <div className="text-[11px] opacity-60 italic text-center py-1">
           No investigator notes attached yet.
@@ -129,10 +133,14 @@ export default function EntityNotes({
               }`}
             >
               <div className="flex items-center justify-between text-[10px] opacity-75">
-                <span className="font-semibold text-cyan-500">{n.investigator_id}</span>
+                <span className="font-semibold text-cyan-500">
+                  {n.investigator_id}
+                </span>
                 <div className="flex items-center gap-2">
                   <span className="font-mono">
-                    {n.created_at ? n.created_at.slice(0, 16).replace("T", " ") : ""}
+                    {n.created_at
+                      ? n.created_at.slice(0, 16).replace("T", " ")
+                      : ""}
                   </span>
                   <button
                     onClick={() => handleDeleteNote(n.note_id)}

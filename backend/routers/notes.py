@@ -15,11 +15,21 @@ router = APIRouter(prefix="/cases", tags=["notes"])
 
 
 class NoteCreate(BaseModel):
-    entity_type: str = Field(..., description="Target type: PERSONA, EVIDENCE, IDENTIFIER, CASE")
-    entity_id: str = Field(..., description="ID of the target persona, evidence, or case")
-    entity_label: Optional[str] = Field(None, description="Human-readable label of target")
-    note_text: str = Field(..., min_length=1, description="Investigator observation text")
-    investigator_id: Optional[str] = Field("investigator_1", description="Author investigator ID")
+    entity_type: str = Field(
+        ..., description="Target type: PERSONA, EVIDENCE, IDENTIFIER, CASE"
+    )
+    entity_id: str = Field(
+        ..., description="ID of the target persona, evidence, or case"
+    )
+    entity_label: Optional[str] = Field(
+        None, description="Human-readable label of target"
+    )
+    note_text: str = Field(
+        ..., min_length=1, description="Investigator observation text"
+    )
+    investigator_id: Optional[str] = Field(
+        "investigator_1", description="Author investigator ID"
+    )
 
 
 @router.post("/{case_id}/notes")
@@ -39,20 +49,23 @@ def add_case_note(case_id: str, note_data: NoteCreate):
     note_id = f"NOTE-{uuid.uuid4().hex[:12].upper()}"
     now = datetime.utcnow().isoformat() + "Z"
 
-    cursor.execute("""
+    cursor.execute(
+        """
         INSERT INTO investigator_notes 
         (note_id, case_id, entity_type, entity_id, entity_label, investigator_id, note_text, created_at)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    """, (
-        note_id,
-        case_id,
-        note_data.entity_type.upper(),
-        note_data.entity_id,
-        note_data.entity_label or note_data.entity_id,
-        note_data.investigator_id or "investigator_1",
-        note_data.note_text.strip(),
-        now,
-    ))
+    """,
+        (
+            note_id,
+            case_id,
+            note_data.entity_type.upper(),
+            note_data.entity_id,
+            note_data.entity_label or note_data.entity_id,
+            note_data.investigator_id or "investigator_1",
+            note_data.note_text.strip(),
+            now,
+        ),
+    )
 
     conn.commit()
     conn.close()
@@ -80,19 +93,25 @@ def list_case_notes(case_id: str, entity_id: Optional[str] = None):
     cursor = conn.cursor()
 
     if entity_id:
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT note_id, case_id, entity_type, entity_id, entity_label, investigator_id, note_text, created_at
             FROM investigator_notes
             WHERE case_id=? AND entity_id=?
             ORDER BY created_at DESC
-        """, (case_id, entity_id))
+        """,
+            (case_id, entity_id),
+        )
     else:
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT note_id, case_id, entity_type, entity_id, entity_label, investigator_id, note_text, created_at
             FROM investigator_notes
             WHERE case_id=?
             ORDER BY created_at DESC
-        """, (case_id,))
+        """,
+            (case_id,),
+        )
 
     rows = cursor.fetchall()
     notes = [dict(r) for r in rows]
@@ -113,12 +132,18 @@ def delete_case_note(case_id: str, note_id: str):
     conn = get_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT note_id FROM investigator_notes WHERE case_id=? AND note_id=?", (case_id, note_id))
+    cursor.execute(
+        "SELECT note_id FROM investigator_notes WHERE case_id=? AND note_id=?",
+        (case_id, note_id),
+    )
     if not cursor.fetchone():
         conn.close()
         raise HTTPException(status_code=404, detail="Note not found")
 
-    cursor.execute("DELETE FROM investigator_notes WHERE case_id=? AND note_id=?", (case_id, note_id))
+    cursor.execute(
+        "DELETE FROM investigator_notes WHERE case_id=? AND note_id=?",
+        (case_id, note_id),
+    )
     conn.commit()
     conn.close()
 

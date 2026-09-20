@@ -80,26 +80,42 @@ def run_evaluation_benchmark(case_id: str, threshold: float = 40.0) -> Dict[str,
     )
     evidence_rows = cursor.fetchall()
 
-    # If no pre-stored evidence, evaluate candidate pairs
+    # If pre-stored evidence exists, use it directly; otherwise evaluate candidate pairs
     predicted_pairs = {}
-    for fp in forum_personas:
-        for mp in market_personas:
-            p_res = evaluate_persona_correlation(
-                case_id, fp["persona_id"], mp["persona_id"]
-            )
-            if p_res:
-                score = p_res.get(
-                    "correlation_score",
-                    p_res.get("score", p_res.get("analytical_score", 0.0)),
+    if evidence_rows:
+        for r in evidence_rows:
+            src = r["source_persona_id"]
+            tgt = r["target_persona_id"]
+            score = float(r["confidence_weight"] or 0.0)
+            if score >= threshold:
+                fp = persona_map.get(src, {})
+                mp = persona_map.get(tgt, {})
+                predicted_pairs[(src, tgt)] = {
+                    "score": score,
+                    "forum_handle": fp.get("canonical_handle", "Unknown"),
+                    "market_handle": mp.get("canonical_handle", "Unknown"),
+                    "forum_uid": fp.get("raw_uid"),
+                    "market_vid": mp.get("raw_vid"),
+                }
+    else:
+        for fp in forum_personas:
+            for mp in market_personas:
+                p_res = evaluate_persona_correlation(
+                    case_id, fp["persona_id"], mp["persona_id"]
                 )
-                if score >= threshold:
-                    predicted_pairs[(fp["persona_id"], mp["persona_id"])] = {
-                        "score": score,
-                        "forum_handle": fp["canonical_handle"],
-                        "market_handle": mp["canonical_handle"],
-                        "forum_uid": fp["raw_uid"],
-                        "market_vid": mp["raw_vid"],
-                    }
+                if p_res:
+                    score = p_res.get(
+                        "correlation_score",
+                        p_res.get("score", p_res.get("analytical_score", 0.0)),
+                    )
+                    if score >= threshold:
+                        predicted_pairs[(fp["persona_id"], mp["persona_id"])] = {
+                            "score": score,
+                            "forum_handle": fp["canonical_handle"],
+                            "market_handle": mp["canonical_handle"],
+                            "forum_uid": fp["raw_uid"],
+                            "market_vid": mp["raw_vid"],
+                        }
 
     # 5. Compute Confusion Matrix
     tp_pairs = []

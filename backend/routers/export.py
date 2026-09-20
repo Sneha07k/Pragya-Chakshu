@@ -105,7 +105,9 @@ def compile_case_dossier(case_id: str) -> Dict[str, Any]:
             "RESEARCH": prov_counts.get("RESEARCH", 0),
             "DERIVED": derived_total,
             "SYNTHETIC": prov_counts.get("SYNTHETIC", 0),
-            "total_events": prov_counts.get("RESEARCH", 0) + derived_total + prov_counts.get("SYNTHETIC", 0),
+            "total_events": prov_counts.get("RESEARCH", 0)
+            + derived_total
+            + prov_counts.get("SYNTHETIC", 0),
         },
         "personas": personas,
         "evidence_inventory": evidence,
@@ -142,6 +144,8 @@ def export_printable_dossier(case_id: str):
     metrics = d.get("evaluation_benchmark", {})
     challenges = d.get("human_challenge_audit_trail", [])
     personas = d.get("personas", [])
+    notes = d.get("investigator_notes", [])
+    evidence = d.get("evidence_inventory", [])
 
     html_content = f"""<!DOCTYPE html>
 <html lang="en">
