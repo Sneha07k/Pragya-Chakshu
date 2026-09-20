@@ -127,6 +127,14 @@ Identifies multi-actor collusion, astroturfing, and coordinated darknet campaign
 - Categorizes coordination patterns: `HIGHLY_SYNCHRONIZED_CASCADE`, `FREQUENT_CO_PARTICIPATION`, and `OCCASIONAL_THREAD_INTERACTION`.
 - Renders dashed cyan `COORDINATED_WITH` edges showing coordination percentage.
 
+### 📝 Capability 4: Investigator Field Notes & Case Annotations
+
+Enables intelligence analysts to document observations, forensic rationales, and hypotheses directly within the investigation graph:
+
+- **Entity-Bound Notes**: Attach timestamps and notes to specific personas, posts, identifiers, or correlation edges.
+- **Audited Provenance**: Every note records investigator ID, ISO UTC timestamp, entity label, and type.
+- **Dossier & Chain of Custody Integration**: Field notes automatically compile into **Section 2** of the Printable Forensic Dossier and machine-readable JSON exports with SHA-256 seal integrity.
+
 ---
 
 ## ⏱️ Time-Cursor Replay Engine (SSE)
@@ -144,8 +152,8 @@ Pragya Chakshu features an asynchronous chronological replay engine:
 
 Case documentation is exportable in two formats:
 
-- **Printable Forensic HTML Dossier (`GET /api/cases/{case_id}/export/dossier`)**: Formatted for print or PDF generation, featuring case summary, chain of custody logs, complete evidence inventory, human challenge audit history, and provenance breakdown.
-- **Structured JSON Export (`GET /api/cases/{case_id}/export/json`)**: Machine-readable dossier.
+- **Printable Forensic HTML Dossier (`GET /api/cases/{case_id}/export/dossier`)**: Formatted for print or PDF generation, featuring case summary, KPIs, persona attribution inventory, **analyst field notes & annotations**, human challenge audit history, and provenance breakdown.
+- **Structured JSON Export (`GET /api/cases/{case_id}/export/json`)**: Machine-readable forensic dossier.
 - **Digital SHA-256 Seal**: The entire case state is serialized and hashed with SHA-256 to create an immutable cryptographic fingerprint locking the forensic state at the time of export.
 
 ---
@@ -171,9 +179,16 @@ The Cytoscape-powered graph canvas is engineered for high readability and elimin
 
 ```
 c:/projects/PC/
+├── dataset/
+│   └── sample/                     # Bundled Standalone Curated Dataset (~2.96 MB)
+│       ├── forum/                  # Sample forum posts & user records
+│       ├── market/                 # Sample vendor profiles & listings
+│       ├── network/                # Sample interaction edges
+│       └── user-matching.tsv       # Hidden ground-truth attribution pairs
+│
 ├── backend/                        # FastAPI Python Backend
 │   ├── adapters/                   # Streaming TSV Adapters & Normalizers
-│   │   ├── evolution_forum.py      # Streams post.tsv & user.tsv
+│   │   ├── evolution_forum.py      # Streams post.tsv & user.tsv (with dynamic offset)
 │   │   ├── evolution_market.py     # Streams vendors.tsv & listings.tsv
 │   │   ├── normalizer.py           # Regex extraction (PGP, BTC, .onion) & provenance
 │   │   └── user_matching.py        # Ingests ground-truth user-matching.tsv
@@ -185,7 +200,7 @@ c:/projects/PC/
 │   │   └── stylometry.py           # NLP engine (Yule's K, TTR, 4-grams, punctuation)
 │   ├── database/                   # Relational & Graph Storage
 │   │   ├── neo4j_client.py         # Neo4j client with persistent NetworkX fallback
-│   │   └── sqlite.py               # SQLite schema (9 relational tables)
+│   │   └── sqlite.py               # SQLite schema (10 relational tables)
 │   ├── replay/                     # Asynchronous Replay Engine
 │   │   ├── replay_engine.py        # Synchronous batch ingestion & entity creation
 │   │   └── sse_stream.py           # Time-cursor SSE streaming state machine
@@ -198,10 +213,11 @@ c:/projects/PC/
 │   │   ├── export.py               # Printable HTML dossier & JSON export
 │   │   ├── graph.py                # Cytoscape-formatted graph query API
 │   │   ├── infrastructure.py       # Controlled synthetic infrastructure endpoints
+│   │   ├── notes.py                # Investigator field notes & annotations API
 │   │   └── replay.py               # Replay control & SSE stream endpoint
 │   ├── synthetic/                  # Controlled Synthetic Module
 │   │   └── infrastructure.py       # Synthetic bulletproof servers, JARM & Tor services
-│   ├── config.py                   # Central system configuration
+│   ├── config.py                   # Central config (automatic sample/raw dataset fallback)
 │   ├── main.py                     # FastAPI application factory & CORS setup
 │   ├── requirements.txt            # Python dependencies
 │   └── run.py                      # Uvicorn entry point (backend-only hot reload)
@@ -210,6 +226,7 @@ c:/projects/PC/
 │   ├── src/
 │   │   ├── components/
 │   │   │   ├── CorrelationInspector.jsx # Score breakdown, challenge modals, audit timeline
+│   │   │   ├── EntityNotes.jsx          # Live investigator notes & annotation panel
 │   │   │   ├── EventFeed.jsx            # Chronological live feed with provenance tags
 │   │   │   ├── GraphCanvas.jsx          # Cytoscape canvas with presets & neighborhood spotlight
 │   │   │   ├── Landing.jsx              # Case selection & initialization
@@ -241,6 +258,7 @@ c:/projects/PC/
 - **Python 3.10+**
 - **Node.js 18+** and `npm`
 - _(Optional)_ **Neo4j 5.0+** (The system automatically activates a persistent NetworkX JSON fallback if Neo4j is offline).
+- **Zero Data Setup Needed**: The repository comes pre-bundled with `dataset/sample/` (~2.96 MB). The system detects and uses this automatically without requiring the 1.8 GB raw archive.
 
 ### 1. Clone the Repository
 
