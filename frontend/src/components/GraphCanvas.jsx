@@ -37,8 +37,8 @@ export default function GraphCanvas({
   // View Presets: 'CORE' | 'ATTRIBUTION' | 'COORDINATION' | 'INFRASTRUCTURE' | 'FULL'
   const [viewPreset, setViewPreset] = useState("CORE");
 
-  // Granular Filter Toggles
-  const [showPosts, setShowPosts] = useState(false);
+  // Granular Filter Toggles (showPosts defaults to true so new post edges actively increment live)
+  const [showPosts, setShowPosts] = useState(true);
   const [showCaseHub, setShowCaseHub] = useState(false);
   const [showPartOfEdges, setShowPartOfEdges] = useState(false);
   const [showEdgeLabels, setShowEdgeLabels] = useState(false);
@@ -847,10 +847,17 @@ export default function GraphCanvas({
             className={isDark ? "text-cyan-400" : "text-cyan-700 font-semibold"}
           >
             {visibleNodesCount} nodes / {visibleEdgesCount} edges
+            {totalRawEdges > visibleEdgesCount && (
+              <span className="opacity-70 ml-1">
+                ({totalRawEdges} total graph edges)
+              </span>
+            )}
           </span>
           <span className="opacity-40">|</span>
           <span className="opacity-70">
-            {totalRawNodes - visibleNodesCount} clutter nodes hidden
+            {totalRawNodes - visibleNodesCount > 0
+              ? `${totalRawNodes - visibleNodesCount} posts/hubs hidden`
+              : "All graph elements visible"}
           </span>
         </div>
       </div>
