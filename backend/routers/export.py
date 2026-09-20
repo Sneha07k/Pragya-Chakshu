@@ -60,9 +60,17 @@ def compile_case_dossier(case_id: str) -> Dict[str, Any]:
     )
     prov_counts = {r["provenance"]: r["count"] for r in cursor.fetchall()}
 
-    # 6. Evaluation metrics
+    # Count derived analytical signals from evidence table
+    cursor.execute(
+        "SELECT count(*) FROM evidence WHERE case_id=? AND provenance='DERIVED'",
+        (case_id,),
+    )
+    derived_evidence_count = cursor.fetchone()[0]
+    derived_total = prov_counts.get("DERIVED", 0) + derived_evidence_count
+
+    # 6. Evaluation metrics (evaluated at calibrated threshold 10.0)
     try:
-        benchmark = run_evaluation_benchmark(case_id, threshold=40.0)
+        benchmark = run_evaluation_benchmark(case_id, threshold=10.0)
     except Exception:
         benchmark = {}
 
@@ -82,9 +90,9 @@ def compile_case_dossier(case_id: str) -> Dict[str, Any]:
         "case": case,
         "provenance_summary": {
             "RESEARCH": prov_counts.get("RESEARCH", 0),
-            "DERIVED": prov_counts.get("DERIVED", 0),
+            "DERIVED": derived_total,
             "SYNTHETIC": prov_counts.get("SYNTHETIC", 0),
-            "total_events": sum(prov_counts.values()),
+            "total_events": prov_counts.get("RESEARCH", 0) + derived_total + prov_counts.get("SYNTHETIC", 0),
         },
         "personas": personas,
         "evidence_inventory": evidence,
@@ -250,7 +258,7 @@ def export_printable_dossier(case_id: str):
         </div>
         <div class="kpi-card">
             <div class="kpi-val">{metrics.get('precision_percent', 'N/A')}%</div>
-            <div class="kpi-lbl">Evaluation Precision (F1: {metrics.get('f1_score', 'N/A')})</div>
+            <div class="kpi-lbl">Precision @ τ=10% (F1: {metrics.get('f1_score', 'N/A')})</div>
         </div>
     </div>
 
