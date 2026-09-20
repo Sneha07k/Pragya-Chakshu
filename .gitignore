@@ -1,8 +1,10 @@
-# Dataset files (large TSVs)
-dataset/
-**/dataset/**
-*.tsv
-*.csv
+# Full dataset archives (large raw TSVs > 1.8 GB)
+dataset/data-and-readme/
+**/data-and-readme/**
+
+# Curated standalone sample dataset (< 3 MB) is tracked for out-of-the-box operation
+!dataset/sample/
+!dataset/sample/**
 
 # Dependencies
 node_modules/
