@@ -207,3 +207,8 @@ export async function deleteCaseNote(caseId, noteId) {
   });
   return res.json();
 }
+
+export async function getCaseBriefing(caseId) {
+  const res = await fetch(`${API_BASE}/cases/${caseId}/briefing`);
+  return res.json();
+}

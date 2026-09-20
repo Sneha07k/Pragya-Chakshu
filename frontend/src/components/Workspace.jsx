@@ -53,6 +53,7 @@ import GraphCanvas from "./GraphCanvas";
 import EventFeed from "./EventFeed";
 import NodeInspector from "./NodeInspector";
 import CorrelationInspector from "./CorrelationInspector";
+import CaseBriefingModal from "./CaseBriefingModal";
 
 export default function Workspace({
   caseData,
@@ -78,6 +79,28 @@ export default function Workspace({
   const [leftDrawerOpen, setLeftDrawerOpen] = useState(true);
   const [rightDrawerOpen, setRightDrawerOpen] = useState(true);
   const [leftTab, setLeftTab] = useState("feed"); // 'feed' | 'ingest' | 'replay'
+  const [showBriefingModal, setShowBriefingModal] = useState(false);
+
+  // Handle entity jump from AI briefing modal
+  const handleNodeSelectFromBriefing = (handleOrId) => {
+    if (!handleOrId || !graphData?.nodes) return;
+    const term = String(handleOrId).toLowerCase().trim();
+    const found = graphData.nodes.find((n) => {
+      const d = n.data || {};
+      return (
+        d.id?.toLowerCase() === term ||
+        d.canonical_handle?.toLowerCase() === term ||
+        d.label?.toLowerCase() === term ||
+        d.ip?.toLowerCase() === term ||
+        d.raw_value?.toLowerCase() === term
+      );
+    });
+    if (found) {
+      setSelectedNode(found.data);
+      setSelectedEdge(null);
+      setRightDrawerOpen(true);
+    }
+  };
 
   // Time-Cursor Replay State
   const [replayStatus, setReplayStatus] = useState("STOPPED");
@@ -455,6 +478,20 @@ export default function Workspace({
           >
             <ShieldCheck className="w-3.5 h-3.5" />
             <span>Evaluation</span>
+          </button>
+
+          {/* AI Case Briefing Button */}
+          <button
+            onClick={() => setShowBriefingModal(true)}
+            className={`text-xs px-2.5 py-1.5 rounded-md font-medium border transition-all flex items-center gap-1.5 cursor-pointer shadow-xs ${
+              isDark
+                ? "bg-gradient-to-r from-purple-950/70 to-cyan-950/70 hover:from-purple-900 hover:to-cyan-900 text-cyan-300 border-purple-800/80 hover:border-cyan-700"
+                : "bg-gradient-to-r from-purple-50 to-cyan-50 hover:from-purple-100 hover:to-cyan-100 text-purple-900 border-purple-200 shadow-2xs"
+            }`}
+            title="Generate automated case briefing and executive summary (NLG)"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+            <span>AI Briefing</span>
           </button>
 
           {/* Export Dossier Menu */}
@@ -1608,6 +1645,17 @@ export default function Workspace({
             </div>
           </div>
         </div>
+      )}
+
+      {/* CASE INTELLIGENCE BRIEFING MODAL */}
+      {showBriefingModal && (
+        <CaseBriefingModal
+          caseId={caseData.case_id}
+          caseData={caseData}
+          onClose={() => setShowBriefingModal(false)}
+          onSelectNode={handleNodeSelectFromBriefing}
+          isDark={isDark}
+        />
       )}
     </div>
   );

@@ -135,6 +135,17 @@ Enables intelligence analysts to document observations, forensic rationales, and
 - **Audited Provenance**: Every note records investigator ID, ISO UTC timestamp, entity label, and type.
 - **Dossier & Chain of Custody Integration**: Field notes automatically compile into **Section 2** of the Printable Forensic Dossier and machine-readable JSON exports with SHA-256 seal integrity.
 
+### 🧠 Capability 5: Automated Intelligence Briefing & Executive Summarizer (NLG)
+
+Generates instant, deterministic Natural Language Generation (NLG) case debriefings for investigators and stakeholders without hallucination:
+
+- **Executive Situation Report**: Plain-English case briefing detailing total entities, timeframe scope (e.g. 428 days of darknet activity), and platform distribution.
+- **Suspect & Attribution Synthesis**: Evaluates top personas, cross-platform identity links, and corroborating evidentiary signals (PGP fingerprints, diurnal schedules, handle continuity).
+- **Telemetry & Infrastructure Correlation**: Summarizes co-hosted `.onion` hidden services, bulletproof server ASNs, and JARM TLS certificates.
+- **Actionable Investigative Inquiries**: Prioritized recommendations (High, Medium, Low) pointing analysts directly toward evidentiary gaps and contested hypotheses.
+- **Interactive Graph Spotlight**: Clicking any persona handle, IP address, or onion URL in the briefing automatically locates and spotlights that node on the Cytoscape graph canvas.
+- **100% Offline & Free**: Operates entirely within the local Python runtime with zero cloud dependencies or API keys.
+
 ---
 
 ## ⏱️ Time-Cursor Replay Engine (SSE)
@@ -194,6 +205,7 @@ c:/projects/PC/
 │   │   └── user_matching.py        # Ingests ground-truth user-matching.tsv
 │   ├── analytics/                  # Core Forensic & Machine Learning Analytics
 │   │   ├── behavioral.py           # 24h diurnal UTC histograms & scheduling comparison
+│   │   ├── briefing.py             # Deterministic intelligence briefing & NLG summarizer
 │   │   ├── coordination.py         # Coordinated thread activity & reply latency (Δt)
 │   │   ├── correlation.py          # Multi-signal persona correlation & human challenge
 │   │   ├── evaluation.py           # Benchmark engine (Precision, Recall, F1 against GT)
@@ -206,6 +218,7 @@ c:/projects/PC/
 │   │   └── sse_stream.py           # Time-cursor SSE streaming state machine
 │   ├── routers/                    # FastAPI REST & SSE Endpoints
 │   │   ├── analytics.py            # Stylometry & behavioral profile endpoints
+│   │   ├── briefing.py             # Case briefing & executive summary API
 │   │   ├── cases.py                # Case CRUD endpoints
 │   │   ├── coordination.py         # Coordinated activity detection endpoints
 │   │   ├── correlation.py          # Persona correlation & challenge/restore endpoints
@@ -225,6 +238,7 @@ c:/projects/PC/
 ├── frontend/                       # Vite + React 19 + Tailwind CSS Frontend
 │   ├── src/
 │   │   ├── components/
+│   │   │   ├── CaseBriefingModal.jsx    # Automated case briefing & intelligence debriefing
 │   │   │   ├── CorrelationInspector.jsx # Score breakdown, challenge modals, audit timeline
 │   │   │   ├── EntityNotes.jsx          # Live investigator notes & annotation panel
 │   │   │   ├── EventFeed.jsx            # Chronological live feed with provenance tags

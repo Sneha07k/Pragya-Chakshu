@@ -15,6 +15,7 @@ from backend.routers import (
     evaluation,
     export,
     notes,
+    briefing,
 )
 
 logging.basicConfig(level=logging.INFO)
@@ -40,6 +41,7 @@ app.include_router(coordination.router, prefix="/api")
 app.include_router(evaluation.router, prefix="/api")
 app.include_router(export.router, prefix="/api")
 app.include_router(notes.router, prefix="/api")
+app.include_router(briefing.router, prefix="/api")
 
 
 @app.on_event("startup")
