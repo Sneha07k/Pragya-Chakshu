@@ -607,7 +607,9 @@ export default function CaseBriefingModal({
                   <div>
                     <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
                       <Users className="w-4 h-4 text-cyan-400" />
-                      <span>Coordinated Activity & Collusion (Capability 3)</span>
+                      <span>
+                        Coordinated Activity & Collusion (Capability 3)
+                      </span>
                       <span className="text-[9px] px-1.5 rounded bg-purple-950 text-purple-300 border border-purple-800">
                         DERIVED
                       </span>
