@@ -183,3 +183,28 @@ export function getCaseExportJsonUrl(caseId) {
 export function getCaseExportDossierUrl(caseId) {
   return `${API_BASE}/cases/${caseId}/export/dossier`;
 }
+
+export async function addCaseNote(caseId, noteData) {
+  const res = await fetch(`${API_BASE}/cases/${caseId}/notes`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(noteData),
+  });
+  return res.json();
+}
+
+export async function getCaseNotes(caseId, entityId = null) {
+  const url = entityId
+    ? `${API_BASE}/cases/${caseId}/notes?entity_id=${encodeURIComponent(entityId)}`
+    : `${API_BASE}/cases/${caseId}/notes`;
+  const res = await fetch(url);
+  return res.json();
+}
+
+export async function deleteCaseNote(caseId, noteId) {
+  const res = await fetch(`${API_BASE}/cases/${caseId}/notes/${noteId}`, {
+    method: "DELETE",
+  });
+  return res.json();
+}
+

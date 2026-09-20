@@ -130,6 +130,18 @@ def init_database():
         vid INTEGER,
         used_in_evaluation INTEGER DEFAULT 0
     );
+
+    CREATE TABLE IF NOT EXISTS investigator_notes (
+        note_id TEXT PRIMARY KEY,
+        case_id TEXT NOT NULL,
+        entity_type TEXT NOT NULL,
+        entity_id TEXT NOT NULL,
+        entity_label TEXT,
+        investigator_id TEXT DEFAULT 'investigator_1',
+        note_text TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(case_id) REFERENCES cases(case_id)
+    );
     """)
 
     conn.commit()

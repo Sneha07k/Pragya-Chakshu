@@ -71,7 +71,6 @@ def compile_case_dossier(case_id: str) -> Dict[str, Any]:
 
     # 6. Evaluation metrics (evaluated at calibrated threshold 10.0)
     try:
-        benchmark = run_evaluation_benchmark(case_id, threshold=40.0)
         benchmark = run_evaluation_benchmark(case_id, threshold=10.0)
     except Exception:
         benchmark = {}
@@ -81,6 +80,18 @@ def compile_case_dossier(case_id: str) -> Dict[str, Any]:
         coordination = detect_coordination_network(case_id, max_pairs=10)
     except Exception:
         coordination = {}
+
+    # 8. Investigator notes
+    cursor.execute(
+        """
+        SELECT note_id, case_id, entity_type, entity_id, entity_label, investigator_id, note_text, created_at
+        FROM investigator_notes
+        WHERE case_id=?
+        ORDER BY created_at ASC
+    """,
+        (case_id,),
+    )
+    notes = [dict(r) for r in cursor.fetchall()]
 
     conn.close()
 
@@ -92,14 +103,13 @@ def compile_case_dossier(case_id: str) -> Dict[str, Any]:
         "case": case,
         "provenance_summary": {
             "RESEARCH": prov_counts.get("RESEARCH", 0),
-            "DERIVED": prov_counts.get("DERIVED", 0),
             "DERIVED": derived_total,
             "SYNTHETIC": prov_counts.get("SYNTHETIC", 0),
-            "total_events": sum(prov_counts.values()),
             "total_events": prov_counts.get("RESEARCH", 0) + derived_total + prov_counts.get("SYNTHETIC", 0),
         },
         "personas": personas,
         "evidence_inventory": evidence,
+        "investigator_notes": notes,
         "human_challenge_audit_trail": challenges,
         "evaluation_benchmark": benchmark.get("metrics", {}),
         "coordination_clusters": coordination.get("coordination_clusters", []),
@@ -262,7 +272,6 @@ def export_printable_dossier(case_id: str):
         </div>
         <div class="kpi-card">
             <div class="kpi-val">{metrics.get('precision_percent', 'N/A')}%</div>
-            <div class="kpi-lbl">Evaluation Precision (F1: {metrics.get('f1_score', 'N/A')})</div>
             <div class="kpi-lbl">Precision @ τ=10% (F1: {metrics.get('f1_score', 'N/A')})</div>
         </div>
     </div>
@@ -283,7 +292,23 @@ def export_printable_dossier(case_id: str):
         </tbody>
     </table>
 
-    <h2>2. Human-in-the-Loop Challenge Audit Trail</h2>
+    <h2>2. Investigator Field Notes & Case Annotations ({len(notes)})</h2>
+    {f"""<table>
+        <thead>
+            <tr>
+                <th>Timestamp (UTC)</th>
+                <th>Investigator</th>
+                <th>Target Entity</th>
+                <th>Type</th>
+                <th>Observation / Note</th>
+            </tr>
+        </thead>
+        <tbody>
+            {"".join(f"<tr><td style='white-space:nowrap;font-family:monospace;color:#475569;'>{n.get('created_at', '')[:19].replace('T', ' ')}</td><td><strong>{n.get('investigator_id')}</strong></td><td><strong>{n.get('entity_label')}</strong></td><td><span class='badge badge-derived'>{n.get('entity_type')}</span></td><td>{n.get('note_text')}</td></tr>" for n in notes)}
+        </tbody>
+    </table>""" if notes else "<p style='color: #64748b; font-style: italic;'>No investigator field notes recorded for this case.</p>"}
+
+    <h2>3. Human-in-the-Loop Challenge Audit Trail</h2>
     {f"""<table>
         <thead>
             <tr>
@@ -300,7 +325,7 @@ def export_printable_dossier(case_id: str):
         </tbody>
     </table>""" if challenges else "<p style='color: #64748b; font-style: italic;'>No human challenges recorded. All evidence items remain in active algorithmic consensus.</p>"}
 
-    <h2>3. Chain of Custody & Integrity Seal</h2>
+    <h2>4. Chain of Custody & Integrity Seal</h2>
     <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; font-family: monospace; font-size: 11px;">
         <div><strong>SHA-256 Digital Fingerprint:</strong> {d['cryptographic_hash_sha256']}</div>
         <div style="margin-top: 4px; color: #64748b;">This cryptographic hash locks the entire state of cases, normalized events, stylometric profiles, and human challenges at time of export.</div>

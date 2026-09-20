@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { getPersonaStylometry, getPersonaBehavioral } from '../api'
 import { FileText, Clock, BarChart3, ShieldAlert } from 'lucide-react'
+import EntityNotes from './EntityNotes'
 
 export default function NodeInspector({ node, caseId }) {
   const [stylometry, setStylometry] = useState(null)
@@ -244,6 +245,14 @@ export default function NodeInspector({ node, caseId }) {
           )}
         </div>
       )}
+
+      {/* Investigator Field Notes & Chain of Custody */}
+      <EntityNotes
+        caseId={caseId}
+        entityType={node.type ? node.type.toUpperCase() : "PERSONA"}
+        entityId={node.id}
+        entityLabel={node.label || node.canonical_handle || node.id}
+      />
     </div>
   )
 }

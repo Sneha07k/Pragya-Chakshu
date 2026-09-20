@@ -11,6 +11,7 @@ import {
   challengeEvidence,
   restoreEvidence,
 } from "../api";
+import EntityNotes from "./EntityNotes";
 
 export default function CorrelationInspector({
   correlationEdge,
@@ -380,6 +381,14 @@ export default function CorrelationInspector({
           </div>
         </div>
       )}
+
+      {/* Investigator Field Notes & Observations on this Evidence Link */}
+      <EntityNotes
+        caseId={caseId}
+        entityType="EVIDENCE"
+        entityId={`${sourceId}_${targetId}`}
+        entityLabel={`Correlation: ${detail.source_persona?.canonical_handle || sourceId} ↔ ${detail.target_persona?.canonical_handle || targetId}`}
+      />
     </div>
   );
 }
