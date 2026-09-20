@@ -2,7 +2,11 @@ import { useState, useEffect } from "react";
 import { PlusCircle, Shield, ChevronRight, Sun, Moon } from "lucide-react";
 import { listCases, createCase } from "../api";
 
-export default function Landing({ onSelectCase, theme = "dark", onToggleTheme }) {
+export default function Landing({
+  onSelectCase,
+  theme = "dark",
+  onToggleTheme,
+}) {
   const [cases, setCases] = useState([]);
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState("");
@@ -40,7 +44,9 @@ export default function Landing({ onSelectCase, theme = "dark", onToggleTheme })
   };
 
   return (
-    <div className={`min-h-screen transition-colors p-8 ${isDark ? "bg-slate-950 text-slate-100" : "bg-slate-50 text-slate-900"}`}>
+    <div
+      className={`min-h-screen transition-colors p-8 ${isDark ? "bg-slate-950 text-slate-100" : "bg-slate-50 text-slate-900"}`}
+    >
       {/* Top Header Controls */}
       <div className="max-w-6xl mx-auto flex justify-end mb-4">
         {onToggleTheme && (
@@ -53,7 +59,11 @@ export default function Landing({ onSelectCase, theme = "dark", onToggleTheme })
             }`}
             title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
           >
-            {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-blue-600" />}
+            {isDark ? (
+              <Sun className="w-4 h-4 text-amber-400" />
+            ) : (
+              <Moon className="w-4 h-4 text-blue-600" />
+            )}
             <span>{isDark ? "Light Mode" : "Dark Mode"}</span>
           </button>
         )}
@@ -63,7 +73,9 @@ export default function Landing({ onSelectCase, theme = "dark", onToggleTheme })
         <header className="mb-12 text-center">
           <div
             className={`inline-flex items-center justify-center p-3.5 rounded-full mb-4 border ${
-              isDark ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200 shadow-sm"
+              isDark
+                ? "bg-slate-900 border-slate-800"
+                : "bg-white border-slate-200 shadow-sm"
             }`}
           >
             <Shield className="w-9 h-9 text-cyan-500" />
@@ -71,7 +83,13 @@ export default function Landing({ onSelectCase, theme = "dark", onToggleTheme })
           <h1 className="text-4xl font-extrabold tracking-tight mb-2">
             PRAGYA CHAKSHU
           </h1>
-          <p className={isDark ? "text-slate-400 font-medium tracking-wide text-lg" : "text-slate-600 font-medium tracking-wide text-lg"}>
+          <p
+            className={
+              isDark
+                ? "text-slate-400 font-medium tracking-wide text-lg"
+                : "text-slate-600 font-medium tracking-wide text-lg"
+            }
+          >
             Cybersecurity Research & Attribution System
           </p>
         </header>
@@ -79,18 +97,24 @@ export default function Landing({ onSelectCase, theme = "dark", onToggleTheme })
         <div className="grid md:grid-cols-2 gap-12">
           {/* Create New Case */}
           <div className="space-y-6">
-            <h2 className={`text-xl font-semibold border-b pb-2 ${isDark ? "text-slate-200 border-slate-800" : "text-slate-800 border-slate-200"}`}>
+            <h2
+              className={`text-xl font-semibold border-b pb-2 ${isDark ? "text-slate-200 border-slate-800" : "text-slate-800 border-slate-200"}`}
+            >
               Create New Case
             </h2>
             <form
               onSubmit={handleCreate}
               className={`p-6 rounded-xl border transition-colors ${
-                isDark ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200 shadow-sm"
+                isDark
+                  ? "bg-slate-900 border-slate-800"
+                  : "bg-white border-slate-200 shadow-sm"
               }`}
             >
               <div className="space-y-4">
                 <div>
-                  <label className={`block text-xs font-semibold uppercase tracking-wider mb-1.5 ${isDark ? "text-slate-400" : "text-slate-600"}`}>
+                  <label
+                    className={`block text-xs font-semibold uppercase tracking-wider mb-1.5 ${isDark ? "text-slate-400" : "text-slate-600"}`}
+                  >
                     Case Name
                   </label>
                   <input
@@ -106,7 +130,9 @@ export default function Landing({ onSelectCase, theme = "dark", onToggleTheme })
                   />
                 </div>
                 <div>
-                  <label className={`block text-xs font-semibold uppercase tracking-wider mb-1.5 ${isDark ? "text-slate-400" : "text-slate-600"}`}>
+                  <label
+                    className={`block text-xs font-semibold uppercase tracking-wider mb-1.5 ${isDark ? "text-slate-400" : "text-slate-600"}`}
+                  >
                     Description
                   </label>
                   <textarea
@@ -124,7 +150,8 @@ export default function Landing({ onSelectCase, theme = "dark", onToggleTheme })
                   type="submit"
                   className="w-full flex items-center justify-center gap-2 bg-cyan-600 hover:bg-cyan-500 text-white py-2.5 px-4 rounded-md font-medium transition-colors cursor-pointer shadow-md"
                 >
-                  <PlusCircle className="w-4 h-4" /> Initialize Investigation Workspace
+                  <PlusCircle className="w-4 h-4" /> Initialize Investigation
+                  Workspace
                 </button>
               </div>
             </form>
@@ -132,16 +159,22 @@ export default function Landing({ onSelectCase, theme = "dark", onToggleTheme })
 
           {/* Active Investigations */}
           <div className="space-y-6">
-            <h2 className={`text-xl font-semibold border-b pb-2 ${isDark ? "text-slate-200 border-slate-800" : "text-slate-800 border-slate-200"}`}>
+            <h2
+              className={`text-xl font-semibold border-b pb-2 ${isDark ? "text-slate-200 border-slate-800" : "text-slate-800 border-slate-200"}`}
+            >
               Active Investigations
             </h2>
 
             {loading ? (
-              <div className="text-slate-500 text-sm py-4">Loading cases...</div>
+              <div className="text-slate-500 text-sm py-4">
+                Loading cases...
+              </div>
             ) : cases.length === 0 ? (
               <div
                 className={`p-6 rounded-lg border text-center text-sm ${
-                  isDark ? "bg-slate-900/40 border-slate-800 text-slate-500" : "bg-white border-slate-200 text-slate-500"
+                  isDark
+                    ? "bg-slate-900/40 border-slate-800 text-slate-500"
+                    : "bg-white border-slate-200 text-slate-500"
                 }`}
               >
                 No active cases found. Create a new case above to begin.
@@ -160,9 +193,13 @@ export default function Landing({ onSelectCase, theme = "dark", onToggleTheme })
                   >
                     <div>
                       <div className="flex items-center gap-2">
-                        <h3 className={`font-semibold text-base transition-colors ${
-                          isDark ? "text-slate-200 group-hover:text-cyan-400" : "text-slate-900 group-hover:text-cyan-600"
-                        }`}>
+                        <h3
+                          className={`font-semibold text-base transition-colors ${
+                            isDark
+                              ? "text-slate-200 group-hover:text-cyan-400"
+                              : "text-slate-900 group-hover:text-cyan-600"
+                          }`}
+                        >
                           {c.name}
                         </h3>
                         <span
@@ -175,11 +212,18 @@ export default function Landing({ onSelectCase, theme = "dark", onToggleTheme })
                           {c.status}
                         </span>
                       </div>
-                      <p className={`text-xs mt-1 line-clamp-1 ${isDark ? "text-slate-400" : "text-slate-600"}`}>
+                      <p
+                        className={`text-xs mt-1 line-clamp-1 ${isDark ? "text-slate-400" : "text-slate-600"}`}
+                      >
                         {c.description || "No description provided."}
                       </p>
-                      <div className={`text-[10px] font-mono mt-2 ${isDark ? "text-slate-500" : "text-slate-400"}`}>
-                        Created: {c.created_at ? new Date(c.created_at).toLocaleDateString() : "N/A"}
+                      <div
+                        className={`text-[10px] font-mono mt-2 ${isDark ? "text-slate-500" : "text-slate-400"}`}
+                      >
+                        Created:{" "}
+                        {c.created_at
+                          ? new Date(c.created_at).toLocaleDateString()
+                          : "N/A"}
                       </div>
                     </div>
                     <ChevronRight className="w-5 h-5 opacity-40 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all text-cyan-500" />

@@ -32,6 +32,7 @@ import {
   PanelLeftOpen,
   PanelRightClose,
   PanelRightOpen,
+  Search,
 } from "lucide-react";
 import {
   getCaseGraph,
@@ -223,6 +224,8 @@ export default function Workspace({
   const [benchmarkThreshold, setBenchmarkThreshold] = useState(10.0);
   const [loadingBenchmark, setLoadingBenchmark] = useState(false);
   const [evalActiveTab, setEvalActiveTab] = useState("benchmark");
+  const [loadingGroundTruth, setLoadingGroundTruth] = useState(false);
+  const [groundTruthSearch, setGroundTruthSearch] = useState("");
 
   const loadBenchmark = async (thresh = benchmarkThreshold) => {
     setLoadingBenchmark(true);
@@ -236,14 +239,24 @@ export default function Workspace({
     }
   };
 
+  const loadGroundTruth = async () => {
+    setLoadingGroundTruth(true);
+    try {
+      const data = await getCaseGroundTruth(caseData.case_id, 100);
+      setGroundTruthData(data);
+    } catch (e) {
+      console.error("Failed to load ground truth", e);
+    } finally {
+      setLoadingGroundTruth(false);
+    }
+  };
+
   const handleToggleEvaluation = async () => {
     const nextState = !evaluationMode;
     setEvaluationMode(nextState);
     if (nextState) {
       if (!groundTruthData) {
-        getCaseGroundTruth(caseData.case_id, 50)
-          .then(setGroundTruthData)
-          .catch(console.error);
+        loadGroundTruth();
       }
       loadBenchmark(benchmarkThreshold);
     }
@@ -346,7 +359,9 @@ export default function Workspace({
         <div className="hidden lg:flex items-center gap-3 text-xs">
           <span
             className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-[11px] font-medium ${
-              isDark ? "bg-slate-950 border-slate-800" : "bg-slate-100 border-slate-200"
+              isDark
+                ? "bg-slate-950 border-slate-800"
+                : "bg-slate-100 border-slate-200"
             }`}
           >
             <span className="w-2 h-2 rounded-full bg-cyan-400"></span>
@@ -355,16 +370,21 @@ export default function Workspace({
 
           <span
             className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-[11px] font-medium ${
-              isDark ? "bg-slate-950 border-slate-800" : "bg-slate-100 border-slate-200"
+              isDark
+                ? "bg-slate-950 border-slate-800"
+                : "bg-slate-100 border-slate-200"
             }`}
           >
             <span className="w-2 h-2 rounded-full bg-pink-400"></span>
-            Attributions: <strong className="ml-0.5">{correlationsCount}</strong>
+            Attributions:{" "}
+            <strong className="ml-0.5">{correlationsCount}</strong>
           </span>
 
           <span
             className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-[11px] font-medium ${
-              isDark ? "bg-slate-950 border-slate-800" : "bg-slate-100 border-slate-200"
+              isDark
+                ? "bg-slate-950 border-slate-800"
+                : "bg-slate-100 border-slate-200"
             }`}
           >
             <span className="w-2 h-2 rounded-full bg-blue-400"></span>
@@ -428,8 +448,8 @@ export default function Workspace({
               evaluationMode
                 ? "bg-purple-600 text-white border-purple-500 shadow-sm"
                 : isDark
-                ? "bg-purple-950/40 text-purple-300 border-purple-800 hover:bg-purple-900/60"
-                : "bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100"
+                  ? "bg-purple-950/40 text-purple-300 border-purple-800 hover:bg-purple-900/60"
+                  : "bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100"
             }`}
             title="Evaluation Mode: Benchmark Precision/Recall against hidden Ground Truth"
           >
@@ -466,7 +486,9 @@ export default function Workspace({
                   rel="noopener noreferrer"
                   onClick={() => setShowExportMenu(false)}
                   className={`px-3 py-2 text-xs flex items-center gap-2 transition-colors ${
-                    isDark ? "hover:bg-slate-800 text-slate-200" : "hover:bg-slate-100 text-slate-800"
+                    isDark
+                      ? "hover:bg-slate-800 text-slate-200"
+                      : "hover:bg-slate-100 text-slate-800"
                   }`}
                 >
                   <FileText className="w-3.5 h-3.5 text-cyan-500" />
@@ -478,7 +500,9 @@ export default function Workspace({
                   rel="noopener noreferrer"
                   onClick={() => setShowExportMenu(false)}
                   className={`px-3 py-2 text-xs flex items-center gap-2 transition-colors ${
-                    isDark ? "hover:bg-slate-800 text-slate-200" : "hover:bg-slate-100 text-slate-800"
+                    isDark
+                      ? "hover:bg-slate-800 text-slate-200"
+                      : "hover:bg-slate-100 text-slate-800"
                   }`}
                 >
                   <Download className="w-3.5 h-3.5 text-emerald-500" />
@@ -501,7 +525,11 @@ export default function Workspace({
               }`}
               title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
             >
-              {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-blue-600" />}
+              {isDark ? (
+                <Sun className="w-4 h-4 text-amber-400" />
+              ) : (
+                <Moon className="w-4 h-4 text-blue-600" />
+              )}
             </button>
           )}
 
@@ -515,12 +543,20 @@ export default function Workspace({
                     ? "bg-slate-800 text-cyan-400 border-cyan-800"
                     : "bg-slate-100 text-cyan-700 border-cyan-300"
                   : isDark
-                  ? "bg-slate-950 border-slate-800 text-slate-500 hover:text-slate-300"
-                  : "bg-white border-slate-200 text-slate-400 hover:text-slate-700"
+                    ? "bg-slate-950 border-slate-800 text-slate-500 hover:text-slate-300"
+                    : "bg-white border-slate-200 text-slate-400 hover:text-slate-700"
               }`}
-              title={leftDrawerOpen ? "Collapse Activity Sidebar" : "Expand Activity Sidebar"}
+              title={
+                leftDrawerOpen
+                  ? "Collapse Activity Sidebar"
+                  : "Expand Activity Sidebar"
+              }
             >
-              {leftDrawerOpen ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeftOpen className="w-4 h-4" />}
+              {leftDrawerOpen ? (
+                <PanelLeftClose className="w-4 h-4" />
+              ) : (
+                <PanelLeftOpen className="w-4 h-4" />
+              )}
             </button>
 
             <button
@@ -531,12 +567,20 @@ export default function Workspace({
                     ? "bg-slate-800 text-cyan-400 border-cyan-800"
                     : "bg-slate-100 text-cyan-700 border-cyan-300"
                   : isDark
-                  ? "bg-slate-950 border-slate-800 text-slate-500 hover:text-slate-300"
-                  : "bg-white border-slate-200 text-slate-400 hover:text-slate-700"
+                    ? "bg-slate-950 border-slate-800 text-slate-500 hover:text-slate-300"
+                    : "bg-white border-slate-200 text-slate-400 hover:text-slate-700"
               }`}
-              title={rightDrawerOpen ? "Collapse Forensic Inspector" : "Expand Forensic Inspector"}
+              title={
+                rightDrawerOpen
+                  ? "Collapse Forensic Inspector"
+                  : "Expand Forensic Inspector"
+              }
             >
-              {rightDrawerOpen ? <PanelRightClose className="w-4 h-4" /> : <PanelRightOpen className="w-4 h-4" />}
+              {rightDrawerOpen ? (
+                <PanelRightClose className="w-4 h-4" />
+              ) : (
+                <PanelRightOpen className="w-4 h-4" />
+              )}
             </button>
           </div>
         </div>
@@ -548,8 +592,8 @@ export default function Workspace({
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-purple-400 shrink-0" />
             <span>
-              <strong>EVALUATION BENCHMARK ACTIVE:</strong> Evaluating analytical
-              hypotheses against hidden historical ground truth.
+              <strong>EVALUATION BENCHMARK ACTIVE:</strong> Evaluating
+              analytical hypotheses against hidden historical ground truth.
             </span>
           </div>
           <button
@@ -567,13 +611,17 @@ export default function Workspace({
         {leftDrawerOpen ? (
           <aside
             className={`w-[340px] border-r flex flex-col shrink-0 transition-all duration-200 z-10 ${
-              isDark ? "bg-slate-900/70 border-slate-800" : "bg-white border-slate-200 shadow-sm"
+              isDark
+                ? "bg-slate-900/70 border-slate-800"
+                : "bg-white border-slate-200 shadow-sm"
             }`}
           >
             {/* Drawer Header with Tabs */}
             <div
               className={`p-2 border-b flex items-center justify-between ${
-                isDark ? "border-slate-800 bg-slate-950/60" : "border-slate-200 bg-slate-50"
+                isDark
+                  ? "border-slate-800 bg-slate-950/60"
+                  : "border-slate-200 bg-slate-50"
               }`}
             >
               <div className="flex items-center gap-1 text-xs">
@@ -583,8 +631,8 @@ export default function Workspace({
                     leftTab === "feed"
                       ? "bg-cyan-600 text-white shadow-xs"
                       : isDark
-                      ? "text-slate-400 hover:text-slate-200"
-                      : "text-slate-600 hover:text-slate-900"
+                        ? "text-slate-400 hover:text-slate-200"
+                        : "text-slate-600 hover:text-slate-900"
                   }`}
                 >
                   <Activity className="w-3.5 h-3.5" />
@@ -597,8 +645,8 @@ export default function Workspace({
                     leftTab === "ingest"
                       ? "bg-cyan-600 text-white shadow-xs"
                       : isDark
-                      ? "text-slate-400 hover:text-slate-200"
-                      : "text-slate-600 hover:text-slate-900"
+                        ? "text-slate-400 hover:text-slate-200"
+                        : "text-slate-600 hover:text-slate-900"
                   }`}
                 >
                   <Layers className="w-3.5 h-3.5" />
@@ -611,8 +659,8 @@ export default function Workspace({
                     leftTab === "replay"
                       ? "bg-cyan-600 text-white shadow-xs"
                       : isDark
-                      ? "text-slate-400 hover:text-slate-200"
-                      : "text-slate-600 hover:text-slate-900"
+                        ? "text-slate-400 hover:text-slate-200"
+                        : "text-slate-600 hover:text-slate-900"
                   }`}
                 >
                   <Clock className="w-3.5 h-3.5" />
@@ -644,15 +692,19 @@ export default function Workspace({
               <div className="p-4 space-y-4 overflow-y-auto flex-1">
                 <div className="space-y-1">
                   <h3 className="text-xs font-semibold uppercase tracking-wider opacity-70 flex items-center gap-1.5">
-                    <Database className="w-4 h-4 text-cyan-500" /> Historical Dataset Source
+                    <Database className="w-4 h-4 text-cyan-500" /> Historical
+                    Dataset Source
                   </h3>
                   <p className="text-[11px] opacity-70">
-                    Stream slices from authentic Evolution forum and marketplace research archives.
+                    Stream slices from authentic Evolution forum and marketplace
+                    research archives.
                   </p>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="block text-xs font-medium opacity-80">Dataset</label>
+                  <label className="block text-xs font-medium opacity-80">
+                    Dataset
+                  </label>
                   <select
                     value={ingestSource}
                     onChange={(e) => setIngestSource(e.target.value)}
@@ -663,14 +715,22 @@ export default function Workspace({
                     }`}
                   >
                     <option value="forum">Forum Posts (post.tsv)</option>
-                    <option value="vendors">Market Vendors (vendors.tsv)</option>
-                    <option value="listings">Market Listings (listings.tsv)</option>
-                    <option value="all">All Datasets (Combined Ingestion)</option>
+                    <option value="vendors">
+                      Market Vendors (vendors.tsv)
+                    </option>
+                    <option value="listings">
+                      Market Listings (listings.tsv)
+                    </option>
+                    <option value="all">
+                      All Datasets (Combined Ingestion)
+                    </option>
                   </select>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="block text-xs font-medium opacity-80">Batch Size</label>
+                  <label className="block text-xs font-medium opacity-80">
+                    Batch Size
+                  </label>
                   <select
                     value={ingestLimit}
                     onChange={(e) => setIngestLimit(e.target.value)}
@@ -693,7 +753,8 @@ export default function Workspace({
                 >
                   {ingesting ? (
                     <>
-                      <RefreshCw className="w-4 h-4 animate-spin" /> Ingesting Dataset...
+                      <RefreshCw className="w-4 h-4 animate-spin" /> Ingesting
+                      Dataset...
                     </>
                   ) : (
                     <>
@@ -710,29 +771,33 @@ export default function Workspace({
                 <div className="space-y-1">
                   <div className="flex items-center justify-between">
                     <h3 className="text-xs font-semibold uppercase tracking-wider opacity-70 flex items-center gap-1.5">
-                      <Clock className="w-4 h-4 text-cyan-500" /> Chronological Replay
+                      <Clock className="w-4 h-4 text-cyan-500" /> Chronological
+                      Replay
                     </h3>
                     <span
                       className={`text-[10px] px-2 py-0.5 rounded font-mono font-semibold uppercase border ${
                         replayStatus === "RUNNING"
                           ? "bg-emerald-900/40 text-emerald-400 border-emerald-700 animate-pulse"
                           : replayStatus === "PAUSED"
-                          ? "bg-amber-900/40 text-amber-400 border-amber-700"
-                          : "bg-slate-800 text-slate-400 border-slate-700"
+                            ? "bg-amber-900/40 text-amber-400 border-amber-700"
+                            : "bg-slate-800 text-slate-400 border-slate-700"
                       }`}
                     >
                       {replayStatus}
                     </span>
                   </div>
                   <p className="text-[11px] opacity-70">
-                    Advances time cursor across authentic historical timestamps via SSE.
+                    Advances time cursor across authentic historical timestamps
+                    via SSE.
                   </p>
                 </div>
 
                 {/* Play / Pause / Stop Buttons */}
                 <div
                   className={`p-2.5 rounded-lg border flex items-center justify-center gap-2 ${
-                    isDark ? "bg-slate-950 border-slate-800" : "bg-slate-100 border-slate-200"
+                    isDark
+                      ? "bg-slate-950 border-slate-800"
+                      : "bg-slate-100 border-slate-200"
                   }`}
                 >
                   {replayStatus === "RUNNING" ? (
@@ -767,7 +832,9 @@ export default function Workspace({
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between text-xs opacity-80">
                     <span>Replay Acceleration</span>
-                    <span className="font-mono font-semibold text-cyan-500">{replaySpeed}x</span>
+                    <span className="font-mono font-semibold text-cyan-500">
+                      {replaySpeed}x
+                    </span>
                   </div>
                   <div className="grid grid-cols-4 gap-1.5">
                     {[1, 5, 20, 60].map((s) => (
@@ -778,8 +845,8 @@ export default function Workspace({
                           replaySpeed === s
                             ? "bg-cyan-600 text-white border-cyan-500 shadow-xs"
                             : isDark
-                            ? "bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200"
-                            : "bg-white border-slate-200 text-slate-600 hover:text-slate-900"
+                              ? "bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200"
+                              : "bg-white border-slate-200 text-slate-600 hover:text-slate-900"
                         }`}
                       >
                         {s}x
@@ -791,10 +858,14 @@ export default function Workspace({
                 {/* Historical Cursor Display */}
                 <div
                   className={`p-3 rounded-lg border space-y-1 ${
-                    isDark ? "bg-slate-950 border-slate-800" : "bg-slate-100 border-slate-200"
+                    isDark
+                      ? "bg-slate-950 border-slate-800"
+                      : "bg-slate-100 border-slate-200"
                   }`}
                 >
-                  <div className="text-[10px] uppercase font-semibold opacity-60">Historical Cursor</div>
+                  <div className="text-[10px] uppercase font-semibold opacity-60">
+                    Historical Cursor
+                  </div>
                   <div className="text-xs font-mono font-bold text-cyan-500 truncate">
                     {replayCursor
                       ? replayCursor.replace("T", " ").replace("Z", " UTC")
@@ -811,7 +882,9 @@ export default function Workspace({
           /* Collapsed Left Icon Rail */
           <aside
             className={`w-12 border-r flex flex-col items-center py-3 gap-3 shrink-0 z-10 transition-colors ${
-              isDark ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200 shadow-2xs"
+              isDark
+                ? "bg-slate-900 border-slate-800"
+                : "bg-white border-slate-200 shadow-2xs"
             }`}
           >
             <button
@@ -879,14 +952,20 @@ export default function Workspace({
                     Capability 2: Evaluation Mode & Benchmark
                   </h2>
                   <p className="text-xs opacity-75 mt-0.5">
-                    Evaluates multi-signal persona attribution against historical ground truth (
-                    <code className="text-purple-400 font-mono">user-matching.tsv</code>).
+                    Evaluates multi-signal persona attribution against
+                    historical ground truth (
+                    <code className="text-purple-400 font-mono">
+                      user-matching.tsv
+                    </code>
+                    ).
                   </p>
                 </div>
 
                 <div
                   className={`border rounded p-0.5 flex text-xs ${
-                    isDark ? "bg-slate-900 border-slate-800" : "bg-slate-100 border-slate-200"
+                    isDark
+                      ? "bg-slate-900 border-slate-800"
+                      : "bg-slate-100 border-slate-200"
                   }`}
                 >
                   <button
@@ -900,7 +979,12 @@ export default function Workspace({
                     Benchmark Metrics
                   </button>
                   <button
-                    onClick={() => setEvalActiveTab("reference")}
+                    onClick={() => {
+                      setEvalActiveTab("reference");
+                      if (!groundTruthData && !loadingGroundTruth) {
+                        loadGroundTruth();
+                      }
+                    }}
                     className={`px-3 py-1 rounded font-medium transition-colors cursor-pointer ${
                       evalActiveTab === "reference"
                         ? "bg-purple-600 text-white"
@@ -917,7 +1001,9 @@ export default function Workspace({
                   {/* Threshold Control Bar */}
                   <div
                     className={`border rounded-xl p-4 flex items-center justify-between shadow-xs ${
-                      isDark ? "bg-slate-900/60 border-slate-800" : "bg-white border-slate-200"
+                      isDark
+                        ? "bg-slate-900/60 border-slate-800"
+                        : "bg-white border-slate-200"
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -930,7 +1016,8 @@ export default function Workspace({
                           </span>
                         </div>
                         <div className="text-[11px] opacity-70">
-                          Attribution hypotheses with score ≥ τ are evaluated as predicted positives.
+                          Attribution hypotheses with score ≥ τ are evaluated as
+                          predicted positives.
                         </div>
                       </div>
                     </div>
@@ -964,15 +1051,20 @@ export default function Workspace({
                     <div className="grid grid-cols-4 gap-4">
                       <div
                         className={`border rounded-xl p-4 ${
-                          isDark ? "bg-slate-900/70 border-slate-800" : "bg-white border-slate-200 shadow-2xs"
+                          isDark
+                            ? "bg-slate-900/70 border-slate-800"
+                            : "bg-white border-slate-200 shadow-2xs"
                         }`}
                       >
-                        <div className="text-xs opacity-75 font-medium">Precision</div>
+                        <div className="text-xs opacity-75 font-medium">
+                          Precision
+                        </div>
                         <div className="text-2xl font-bold text-emerald-500 mt-1">
                           {benchmarkData.metrics?.precision_percent}%
                         </div>
                         <div className="text-[11px] opacity-60 font-mono mt-0.5">
-                          TP / (TP + FP) = {benchmarkData.metrics?.true_positives} /{" "}
+                          TP / (TP + FP) ={" "}
+                          {benchmarkData.metrics?.true_positives} /{" "}
                           {(benchmarkData.metrics?.true_positives || 0) +
                             (benchmarkData.metrics?.false_positives || 0)}
                         </div>
@@ -980,15 +1072,20 @@ export default function Workspace({
 
                       <div
                         className={`border rounded-xl p-4 ${
-                          isDark ? "bg-slate-900/70 border-slate-800" : "bg-white border-slate-200 shadow-2xs"
+                          isDark
+                            ? "bg-slate-900/70 border-slate-800"
+                            : "bg-white border-slate-200 shadow-2xs"
                         }`}
                       >
-                        <div className="text-xs opacity-75 font-medium">Recall</div>
+                        <div className="text-xs opacity-75 font-medium">
+                          Recall
+                        </div>
                         <div className="text-2xl font-bold text-cyan-500 mt-1">
                           {benchmarkData.metrics?.recall_percent}%
                         </div>
                         <div className="text-[11px] opacity-60 font-mono mt-0.5">
-                          TP / (TP + FN) = {benchmarkData.metrics?.true_positives} /{" "}
+                          TP / (TP + FN) ={" "}
+                          {benchmarkData.metrics?.true_positives} /{" "}
                           {(benchmarkData.metrics?.true_positives || 0) +
                             (benchmarkData.metrics?.false_negatives || 0)}
                         </div>
@@ -996,31 +1093,50 @@ export default function Workspace({
 
                       <div
                         className={`border rounded-xl p-4 ${
-                          isDark ? "bg-slate-900/70 border-slate-800" : "bg-white border-slate-200 shadow-2xs"
+                          isDark
+                            ? "bg-slate-900/70 border-slate-800"
+                            : "bg-white border-slate-200 shadow-2xs"
                         }`}
                       >
-                        <div className="text-xs opacity-75 font-medium">F1 Score</div>
+                        <div className="text-xs opacity-75 font-medium">
+                          F1 Score
+                        </div>
                         <div className="text-2xl font-bold text-purple-500 mt-1">
                           {benchmarkData.metrics?.f1_score}
                         </div>
-                        <div className="text-[11px] opacity-60 mt-0.5">Harmonic mean of P & R</div>
+                        <div className="text-[11px] opacity-60 mt-0.5">
+                          Harmonic mean of P & R
+                        </div>
                       </div>
 
                       <div
                         className={`border rounded-xl p-4 ${
-                          isDark ? "bg-slate-900/70 border-slate-800" : "bg-white border-slate-200 shadow-2xs"
+                          isDark
+                            ? "bg-slate-900/70 border-slate-800"
+                            : "bg-white border-slate-200 shadow-2xs"
                         }`}
                       >
-                        <div className="text-xs opacity-75 font-medium">Contingency</div>
+                        <div className="text-xs opacity-75 font-medium">
+                          Contingency
+                        </div>
                         <div className="text-xs font-mono mt-1.5 space-y-0.5">
                           <div className="text-emerald-500 flex justify-between">
-                            <span>TP (Verified):</span> <strong>{benchmarkData.metrics?.true_positives}</strong>
+                            <span>TP (Verified):</span>{" "}
+                            <strong>
+                              {benchmarkData.metrics?.true_positives}
+                            </strong>
                           </div>
                           <div className="text-amber-500 flex justify-between">
-                            <span>FP (Mistakes):</span> <strong>{benchmarkData.metrics?.false_positives}</strong>
+                            <span>FP (Mistakes):</span>{" "}
+                            <strong>
+                              {benchmarkData.metrics?.false_positives}
+                            </strong>
                           </div>
                           <div className="text-rose-500 flex justify-between">
-                            <span>FN (Missed):</span> <strong>{benchmarkData.metrics?.false_negatives}</strong>
+                            <span>FN (Missed):</span>{" "}
+                            <strong>
+                              {benchmarkData.metrics?.false_negatives}
+                            </strong>
                           </div>
                         </div>
                       </div>
@@ -1032,7 +1148,8 @@ export default function Workspace({
                     <div>
                       <h3 className="text-xs font-semibold mb-2 flex items-center gap-1.5">
                         <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                        True Positive Predictions (Attribution Confirmed by Ground Truth)
+                        True Positive Predictions (Attribution Confirmed by
+                        Ground Truth)
                       </h3>
                       <div
                         className={`border rounded-xl overflow-hidden ${
@@ -1042,7 +1159,9 @@ export default function Workspace({
                         <table className="w-full text-xs text-left">
                           <thead
                             className={`border-b font-medium ${
-                              isDark ? "bg-slate-900 text-slate-400 border-slate-800" : "bg-slate-100 text-slate-600 border-slate-200"
+                              isDark
+                                ? "bg-slate-900 text-slate-400 border-slate-800"
+                                : "bg-slate-100 text-slate-600 border-slate-200"
                             }`}
                           >
                             <tr>
@@ -1055,27 +1174,41 @@ export default function Workspace({
                           </thead>
                           <tbody
                             className={`divide-y font-mono ${
-                              isDark ? "divide-slate-800/60" : "divide-slate-200"
+                              isDark
+                                ? "divide-slate-800/60"
+                                : "divide-slate-200"
                             }`}
                           >
-                            {benchmarkData.true_positive_predictions.map((p, idx) => (
-                              <tr
-                                key={idx}
-                                className={isDark ? "hover:bg-slate-900/40" : "hover:bg-slate-50"}
-                              >
-                                <td className="p-2.5 font-semibold text-cyan-500">{p.forum_handle}</td>
-                                <td className="p-2.5 font-semibold text-purple-500">{p.market_handle}</td>
-                                <td className="p-2.5 opacity-75">
-                                  {p.forum_uid} ↔ {p.market_vid}
-                                </td>
-                                <td className="p-2.5 text-emerald-500 font-bold">{p.score}%</td>
-                                <td className="p-2.5">
-                                  <span className="text-[10px] bg-emerald-500/20 text-emerald-500 border border-emerald-500/40 px-2 py-0.5 rounded font-sans font-semibold">
-                                    CONFIRMED MATCH
-                                  </span>
-                                </td>
-                              </tr>
-                            ))}
+                            {benchmarkData.true_positive_predictions.map(
+                              (p, idx) => (
+                                <tr
+                                  key={idx}
+                                  className={
+                                    isDark
+                                      ? "hover:bg-slate-900/40"
+                                      : "hover:bg-slate-50"
+                                  }
+                                >
+                                  <td className="p-2.5 font-semibold text-cyan-500">
+                                    {p.forum_handle}
+                                  </td>
+                                  <td className="p-2.5 font-semibold text-purple-500">
+                                    {p.market_handle}
+                                  </td>
+                                  <td className="p-2.5 opacity-75">
+                                    {p.forum_uid} ↔ {p.market_vid}
+                                  </td>
+                                  <td className="p-2.5 text-emerald-500 font-bold">
+                                    {p.score}%
+                                  </td>
+                                  <td className="p-2.5">
+                                    <span className="text-[10px] bg-emerald-500/20 text-emerald-500 border border-emerald-500/40 px-2 py-0.5 rounded font-sans font-semibold">
+                                      CONFIRMED MATCH
+                                    </span>
+                                  </td>
+                                </tr>
+                              ),
+                            )}
                           </tbody>
                         </table>
                       </div>
@@ -1084,53 +1217,181 @@ export default function Workspace({
                 </div>
               ) : (
                 /* Ground Truth Reference Catalog */
-                <div>
-                  <h3 className="text-xs font-semibold mb-2">
-                    Verified Evolution Forum ↔ Market Ground Truth Archive
-                  </h3>
-                  <div
-                    className={`border rounded-xl overflow-hidden ${
-                      isDark ? "border-slate-800" : "border-slate-200"
-                    }`}
-                  >
-                    <table className="w-full text-xs text-left">
-                      <thead
-                        className={`border-b font-medium ${
-                          isDark ? "bg-slate-900 text-slate-400 border-slate-800" : "bg-slate-100 text-slate-600 border-slate-200"
+                <div className="space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                      <h3 className="text-xs font-semibold flex items-center gap-1.5">
+                        <Database className="w-4 h-4 text-purple-500" />
+                        Verified Evolution Forum ↔ Market Ground Truth Archive
+                      </h3>
+                      <p className="text-[11px] opacity-70">
+                        Historical ground truth pairings from <code className="text-purple-400 font-mono">user-matching.tsv</code> used to score attribution precision and recall.
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={loadGroundTruth}
+                        disabled={loadingGroundTruth}
+                        className={`text-xs px-2.5 py-1.5 rounded-md border font-medium flex items-center gap-1.5 transition-colors cursor-pointer ${
+                          isDark
+                            ? "bg-slate-900 border-slate-700 text-slate-300 hover:bg-slate-800"
+                            : "bg-white border-slate-300 text-slate-700 hover:bg-slate-100 shadow-2xs"
                         }`}
                       >
-                        <tr>
-                          <th className="p-2.5">ID</th>
-                          <th className="p-2.5">Username</th>
-                          <th className="p-2.5">Forum UID</th>
-                          <th className="p-2.5">Market VID</th>
-                          <th className="p-2.5">Provenance</th>
-                        </tr>
-                      </thead>
-                      <tbody
-                        className={`divide-y font-mono ${
-                          isDark ? "divide-slate-800/60" : "divide-slate-200"
-                        }`}
-                      >
-                        {groundTruthData?.matches?.map((m, idx) => (
-                          <tr
-                            key={idx}
-                            className={isDark ? "hover:bg-slate-900/40" : "hover:bg-slate-50"}
-                          >
-                            <td className="p-2.5 opacity-60">#{m.match_id}</td>
-                            <td className="p-2.5 font-semibold text-purple-500">{m.username}</td>
-                            <td className="p-2.5">{m.uid}</td>
-                            <td className="p-2.5">{m.vid}</td>
-                            <td className="p-2.5">
-                              <span className="text-[10px] bg-purple-500/20 text-purple-500 border border-purple-500/40 px-2 py-0.5 rounded font-sans">
-                                UNREVEALED_REFERENCE
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        <RefreshCw
+                          className={`w-3.5 h-3.5 text-purple-500 ${loadingGroundTruth ? "animate-spin" : ""}`}
+                        />
+                        <span>{loadingGroundTruth ? "Loading..." : "Reload Archive"}</span>
+                      </button>
+                    </div>
                   </div>
+
+                  {/* Filter & Counter Bar */}
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="relative flex-1 max-w-sm">
+                      <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 opacity-50" />
+                      <input
+                        type="text"
+                        placeholder="Search by username, Forum UID, or Market VID..."
+                        value={groundTruthSearch}
+                        onChange={(e) => setGroundTruthSearch(e.target.value)}
+                        className={`text-xs pl-8 pr-3 py-1.5 rounded-lg border w-full focus:outline-none focus:border-purple-500 ${
+                          isDark
+                            ? "bg-slate-900/90 border-slate-700 text-slate-200 placeholder-slate-500"
+                            : "bg-white border-slate-300 text-slate-800 placeholder-slate-400 shadow-2xs"
+                        }`}
+                      />
+                    </div>
+
+                    <div className="text-[11px] opacity-75 font-mono">
+                      {(() => {
+                        const allMatches =
+                          groundTruthData?.matches ||
+                          groundTruthData?.sample_reference_matches ||
+                          [];
+                        const filtered = allMatches.filter((m) => {
+                          if (!groundTruthSearch.trim()) return true;
+                          const q = groundTruthSearch.toLowerCase().trim();
+                          return (
+                            (m.username && m.username.toLowerCase().includes(q)) ||
+                            String(m.uid).includes(q) ||
+                            String(m.vid).includes(q) ||
+                            String(m.match_id).includes(q)
+                          );
+                        });
+                        return `Showing ${filtered.length} of ${allMatches.length} ground-truth pairs`;
+                      })()}
+                    </div>
+                  </div>
+
+                  {/* Table or Empty State */}
+                  {(() => {
+                    const allMatches =
+                      groundTruthData?.matches ||
+                      groundTruthData?.sample_reference_matches ||
+                      [];
+                    const filtered = allMatches.filter((m) => {
+                      if (!groundTruthSearch.trim()) return true;
+                      const q = groundTruthSearch.toLowerCase().trim();
+                      return (
+                        (m.username && m.username.toLowerCase().includes(q)) ||
+                        String(m.uid).includes(q) ||
+                        String(m.vid).includes(q) ||
+                        String(m.match_id).includes(q)
+                      );
+                    });
+
+                    if (loadingGroundTruth && allMatches.length === 0) {
+                      return (
+                        <div className="p-8 text-center border rounded-xl flex flex-col items-center justify-center gap-2">
+                          <RefreshCw className="w-6 h-6 animate-spin text-purple-500" />
+                          <span className="text-xs opacity-70">
+                            Loading verified ground-truth archive from database...
+                          </span>
+                        </div>
+                      );
+                    }
+
+                    if (allMatches.length === 0) {
+                      return (
+                        <div
+                          className={`p-8 text-center border rounded-xl flex flex-col items-center justify-center gap-3 ${
+                            isDark ? "border-slate-800 bg-slate-900/40" : "border-slate-200 bg-slate-50"
+                          }`}
+                        >
+                          <Database className="w-8 h-8 text-purple-500/60" />
+                          <div>
+                            <div className="text-xs font-semibold">No Ground Truth Records Loaded</div>
+                            <p className="text-[11px] opacity-70 mt-0.5">
+                              Click below to read and cache verified pairings from <code>dataset/forum-market/user-matching.tsv</code>.
+                            </p>
+                          </div>
+                          <button
+                            onClick={loadGroundTruth}
+                            disabled={loadingGroundTruth}
+                            className="text-xs px-3 py-1.5 rounded-md bg-purple-600 hover:bg-purple-500 text-white font-medium cursor-pointer"
+                          >
+                            Load Ground Truth Now
+                          </button>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div
+                        className={`border rounded-xl overflow-hidden max-h-[60vh] overflow-y-auto ${
+                          isDark ? "border-slate-800" : "border-slate-200 shadow-2xs"
+                        }`}
+                      >
+                        <table className="w-full text-xs text-left">
+                          <thead
+                            className={`border-b font-medium sticky top-0 z-10 backdrop-blur ${
+                              isDark
+                                ? "bg-slate-900/95 text-slate-400 border-slate-800"
+                                : "bg-slate-100/95 text-slate-600 border-slate-200"
+                            }`}
+                          >
+                            <tr>
+                              <th className="p-2.5">ID</th>
+                              <th className="p-2.5">Username</th>
+                              <th className="p-2.5">Forum UID</th>
+                              <th className="p-2.5">Market VID</th>
+                              <th className="p-2.5">Provenance</th>
+                            </tr>
+                          </thead>
+                          <tbody
+                            className={`divide-y font-mono ${
+                              isDark ? "divide-slate-800/60" : "divide-slate-200"
+                            }`}
+                          >
+                            {filtered.map((m, idx) => (
+                              <tr
+                                key={idx}
+                                className={
+                                  isDark
+                                    ? "hover:bg-slate-900/40"
+                                    : "hover:bg-slate-50"
+                                }
+                              >
+                                <td className="p-2.5 opacity-60">#{m.match_id}</td>
+                                <td className="p-2.5 font-semibold text-purple-500">
+                                  {m.username}
+                                </td>
+                                <td className="p-2.5">{m.uid}</td>
+                                <td className="p-2.5">{m.vid}</td>
+                                <td className="p-2.5">
+                                  <span className="text-[10px] bg-purple-500/20 text-purple-500 border border-purple-500/40 px-2 py-0.5 rounded font-sans">
+                                    UNREVEALED_REFERENCE
+                                  </span>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    );
+                  })()}
                 </div>
               )}
             </div>
@@ -1159,12 +1420,16 @@ export default function Workspace({
         {rightDrawerOpen ? (
           <aside
             className={`w-[340px] border-l flex flex-col shrink-0 transition-all duration-200 z-10 ${
-              isDark ? "bg-slate-900/70 border-slate-800" : "bg-white border-slate-200 shadow-sm"
+              isDark
+                ? "bg-slate-900/70 border-slate-800"
+                : "bg-white border-slate-200 shadow-sm"
             }`}
           >
             <div
               className={`p-3 border-b flex justify-between items-center ${
-                isDark ? "border-slate-800 bg-slate-950/60" : "border-slate-200 bg-slate-50"
+                isDark
+                  ? "border-slate-800 bg-slate-950/60"
+                  : "border-slate-200 bg-slate-50"
               }`}
             >
               <h2 className="font-semibold text-xs uppercase tracking-wider opacity-80 flex items-center gap-1.5">
@@ -1219,7 +1484,9 @@ export default function Workspace({
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div
             className={`border rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl ${
-              isDark ? "bg-slate-900 border-slate-700 text-slate-200" : "bg-white border-slate-200 text-slate-800"
+              isDark
+                ? "bg-slate-900 border-slate-700 text-slate-200"
+                : "bg-white border-slate-200 text-slate-800"
             }`}
           >
             <div
@@ -1229,7 +1496,9 @@ export default function Workspace({
             >
               <div className="flex items-center gap-2">
                 <Users className="w-5 h-5 text-cyan-500" />
-                <h3 className="font-bold text-sm">Capability 3: Coordinated Activity Analysis</h3>
+                <h3 className="font-bold text-sm">
+                  Capability 3: Coordinated Activity Analysis
+                </h3>
               </div>
               <button
                 onClick={() => setShowCoordModal(false)}
@@ -1242,17 +1511,23 @@ export default function Workspace({
             <div className="p-5 overflow-y-auto space-y-4 text-xs">
               <div
                 className={`p-3.5 rounded-xl border flex items-center justify-between ${
-                  isDark ? "bg-slate-950 border-slate-800" : "bg-slate-50 border-slate-200"
+                  isDark
+                    ? "bg-slate-950 border-slate-800"
+                    : "bg-slate-50 border-slate-200"
                 }`}
               >
                 <div>
-                  <div className="text-[11px] opacity-60">Coordinated Pairs Detected</div>
+                  <div className="text-[11px] opacity-60">
+                    Coordinated Pairs Detected
+                  </div>
                   <div className="text-xl font-bold text-cyan-500 mt-0.5">
                     {coordResults.coordinated_pairs_count}
                   </div>
                 </div>
                 <div>
-                  <div className="text-[11px] opacity-60">Graph Links Added</div>
+                  <div className="text-[11px] opacity-60">
+                    Graph Links Added
+                  </div>
                   <div className="text-xl font-bold text-purple-500 mt-0.5">
                     {coordResults.coordination_links_added}
                   </div>
@@ -1260,13 +1535,17 @@ export default function Workspace({
               </div>
 
               <div className="space-y-2">
-                <div className="font-semibold opacity-80">Top Coordinated Persona Pairs</div>
+                <div className="font-semibold opacity-80">
+                  Top Coordinated Persona Pairs
+                </div>
                 <div className="space-y-1.5 max-h-60 overflow-y-auto">
                   {coordResults.top_coordinated_pairs?.map((cp, idx) => (
                     <div
                       key={idx}
                       className={`p-2.5 rounded-lg border flex items-center justify-between ${
-                        isDark ? "bg-slate-950/70 border-slate-800" : "bg-slate-50 border-slate-200"
+                        isDark
+                          ? "bg-slate-950/70 border-slate-800"
+                          : "bg-slate-50 border-slate-200"
                       }`}
                     >
                       <div>
@@ -1274,12 +1553,17 @@ export default function Workspace({
                           {cp.source} ↔ {cp.target}
                         </div>
                         <div className="text-[10px] opacity-60 mt-0.5">
-                          Pattern: {cp.pattern?.replace(/_/g, " ")} | Co-posts: {cp.co_posts}
+                          Pattern: {cp.pattern?.replace(/_/g, " ")} | Co-posts:{" "}
+                          {cp.co_posts}
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="font-bold text-cyan-500">{cp.coordination_score}%</div>
-                        <div className="text-[10px] opacity-60">Avg Δt: {cp.avg_latency_sec}s</div>
+                        <div className="font-bold text-cyan-500">
+                          {cp.coordination_score}%
+                        </div>
+                        <div className="text-[10px] opacity-60">
+                          Avg Δt: {cp.avg_latency_sec}s
+                        </div>
                       </div>
                     </div>
                   ))}

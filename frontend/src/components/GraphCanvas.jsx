@@ -311,7 +311,9 @@ export default function GraphCanvas({
             "text-background-opacity": 0.9,
             label: (ele) => {
               const score = ele.data("score");
-              return score !== undefined ? `CORRELATED ${score}%` : "CORRELATED";
+              return score !== undefined
+                ? `CORRELATED ${score}%`
+                : "CORRELATED";
             },
           },
         },
@@ -329,7 +331,9 @@ export default function GraphCanvas({
             "text-background-opacity": 0.9,
             label: (ele) => {
               const score = ele.data("score");
-              return score !== undefined ? `COORDINATED ${score}%` : "COORDINATED";
+              return score !== undefined
+                ? `COORDINATED ${score}%`
+                : "COORDINATED";
             },
           },
         },
@@ -589,7 +593,9 @@ export default function GraphCanvas({
   return (
     <div
       className={`relative w-full h-full flex flex-col overflow-hidden select-none ${
-        isDark ? "canvas-grid-dark text-slate-100" : "canvas-grid-light text-slate-900"
+        isDark
+          ? "canvas-grid-dark text-slate-100"
+          : "canvas-grid-light text-slate-900"
       }`}
     >
       {/* TOP CONTROL TOOLBAR */}
@@ -603,7 +609,9 @@ export default function GraphCanvas({
         {/* Left: View Presets */}
         <div
           className={`flex items-center gap-1.5 p-1 rounded-lg border ${
-            isDark ? "bg-slate-950/80 border-slate-800" : "bg-slate-100 border-slate-200"
+            isDark
+              ? "bg-slate-950/80 border-slate-800"
+              : "bg-slate-100 border-slate-200"
           }`}
         >
           <button
@@ -612,8 +620,8 @@ export default function GraphCanvas({
               viewPreset === "CORE"
                 ? "bg-cyan-600 text-white shadow"
                 : isDark
-                ? "text-slate-400 hover:text-slate-200"
-                : "text-slate-600 hover:text-slate-900"
+                  ? "text-slate-400 hover:text-slate-200"
+                  : "text-slate-600 hover:text-slate-900"
             }`}
             title="Core investigation: Personas, active correlations, coordination, and infrastructure. Hides raw posts."
           >
@@ -627,8 +635,8 @@ export default function GraphCanvas({
               viewPreset === "ATTRIBUTION"
                 ? "bg-pink-600 text-white shadow"
                 : isDark
-                ? "text-slate-400 hover:text-slate-200"
-                : "text-slate-600 hover:text-slate-900"
+                  ? "text-slate-400 hover:text-slate-200"
+                  : "text-slate-600 hover:text-slate-900"
             }`}
             title="Capability 2: Actor Attribution hypotheses & PGP key continuity"
           >
@@ -642,8 +650,8 @@ export default function GraphCanvas({
               viewPreset === "COORDINATION"
                 ? "bg-cyan-500 text-slate-950 font-semibold shadow"
                 : isDark
-                ? "text-slate-400 hover:text-slate-200"
-                : "text-slate-600 hover:text-slate-900"
+                  ? "text-slate-400 hover:text-slate-200"
+                  : "text-slate-600 hover:text-slate-900"
             }`}
             title="Capability 3: Coordinated darknet posting bursts & cliques"
           >
@@ -657,8 +665,8 @@ export default function GraphCanvas({
               viewPreset === "INFRASTRUCTURE"
                 ? "bg-rose-600 text-white shadow"
                 : isDark
-                ? "text-slate-400 hover:text-slate-200"
-                : "text-slate-600 hover:text-slate-900"
+                  ? "text-slate-400 hover:text-slate-200"
+                  : "text-slate-600 hover:text-slate-900"
             }`}
             title="Capability 1: Controlled synthetic physical servers, JARM TLS, and Tor services"
           >
@@ -674,8 +682,8 @@ export default function GraphCanvas({
                   ? "bg-slate-700 text-slate-100"
                   : "bg-slate-800 text-white"
                 : isDark
-                ? "text-slate-400 hover:text-slate-200"
-                : "text-slate-600 hover:text-slate-900"
+                  ? "text-slate-400 hover:text-slate-200"
+                  : "text-slate-600 hover:text-slate-900"
             }`}
             title="Full unfiltered raw graph topology"
           >
@@ -728,7 +736,13 @@ export default function GraphCanvas({
         <div className="flex items-center gap-2">
           {/* Layout dropdown */}
           <div className="flex items-center gap-1">
-            <span className={isDark ? "text-slate-400 text-[11px]" : "text-slate-500 text-[11px]"}>
+            <span
+              className={
+                isDark
+                  ? "text-slate-400 text-[11px]"
+                  : "text-slate-500 text-[11px]"
+              }
+            >
               Layout:
             </span>
             <select
@@ -768,8 +782,8 @@ export default function GraphCanvas({
                   ? "bg-slate-800 text-cyan-400 border-cyan-700"
                   : "bg-cyan-50 text-cyan-700 border-cyan-300"
                 : isDark
-                ? "bg-slate-950 text-slate-400 hover:text-slate-200 border-slate-800"
-                : "bg-white text-slate-600 hover:text-slate-900 border-slate-300 shadow-2xs"
+                  ? "bg-slate-950 text-slate-400 hover:text-slate-200 border-slate-800"
+                  : "bg-white text-slate-600 hover:text-slate-900 border-slate-300 shadow-2xs"
             }`}
           >
             <Info className="w-3.5 h-3.5" />
@@ -799,7 +813,10 @@ export default function GraphCanvas({
               className="accent-cyan-500 rounded cursor-pointer"
             />
             <span>
-              Raw Posts ({elements?.nodes?.filter((n) => n.data.type === "Post").length || 0})
+              Raw Posts (
+              {elements?.nodes?.filter((n) => n.data.type === "Post").length ||
+                0}
+              )
             </span>
           </label>
 
@@ -826,7 +843,9 @@ export default function GraphCanvas({
 
         {/* Current Visibility Counter */}
         <div className="flex items-center gap-2 font-mono text-[10px]">
-          <span className={isDark ? "text-cyan-400" : "text-cyan-700 font-semibold"}>
+          <span
+            className={isDark ? "text-cyan-400" : "text-cyan-700 font-semibold"}
+          >
             {visibleNodesCount} nodes / {visibleEdgesCount} edges
           </span>
           <span className="opacity-40">|</span>
@@ -852,7 +871,9 @@ export default function GraphCanvas({
             </span>
             <span
               className={`text-[10px] px-1.5 py-0.5 rounded font-mono ${
-                isDark ? "bg-slate-800 text-slate-400" : "bg-slate-100 text-slate-600"
+                isDark
+                  ? "bg-slate-800 text-slate-400"
+                  : "bg-slate-100 text-slate-600"
               }`}
             >
               {activeFocusNode.type || "Persona"}
@@ -890,7 +911,9 @@ export default function GraphCanvas({
           {/* Tooltip */}
           <span
             className={`absolute right-14 whitespace-nowrap text-[11px] px-2.5 py-1 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none font-medium ${
-              isDark ? "bg-slate-900 text-white border border-slate-700" : "bg-slate-800 text-white"
+              isDark
+                ? "bg-slate-900 text-white border border-slate-700"
+                : "bg-slate-800 text-white"
             }`}
           >
             Recenter on Graph
@@ -957,9 +980,9 @@ export default function GraphCanvas({
           </div>
 
           <p className="opacity-80 text-[11px] leading-relaxed">
-            <strong>Pragya Chakshu</strong> visualizes darknet actors, pseudonyms, and
-            infrastructure clusters. Solid lines denote observed research data; dashed lines
-            indicate analytical intelligence.
+            <strong>Pragya Chakshu</strong> visualizes darknet actors,
+            pseudonyms, and infrastructure clusters. Solid lines denote observed
+            research data; dashed lines indicate analytical intelligence.
           </p>
 
           {/* Node Guide */}
@@ -970,7 +993,9 @@ export default function GraphCanvas({
             <div className="grid grid-cols-2 gap-1.5 text-[11px]">
               <div
                 className={`flex items-center gap-2 p-1.5 rounded border ${
-                  isDark ? "bg-slate-950/70 border-slate-800/80" : "bg-slate-50 border-slate-200"
+                  isDark
+                    ? "bg-slate-950/70 border-slate-800/80"
+                    : "bg-slate-50 border-slate-200"
                 }`}
               >
                 <span className="w-3.5 h-3.5 rounded-full bg-cyan-500 shrink-0" />
@@ -978,7 +1003,9 @@ export default function GraphCanvas({
               </div>
               <div
                 className={`flex items-center gap-2 p-1.5 rounded border ${
-                  isDark ? "bg-slate-950/70 border-purple-900/40" : "bg-purple-50 border-purple-200"
+                  isDark
+                    ? "bg-slate-950/70 border-purple-900/40"
+                    : "bg-purple-50 border-purple-200"
                 }`}
               >
                 <span className="w-3.5 h-3.5 rounded-full bg-purple-500 border border-purple-300 shrink-0" />
@@ -986,7 +1013,9 @@ export default function GraphCanvas({
               </div>
               <div
                 className={`flex items-center gap-2 p-1.5 rounded border ${
-                  isDark ? "bg-slate-950/70 border-slate-800/80" : "bg-amber-50 border-amber-200"
+                  isDark
+                    ? "bg-slate-950/70 border-slate-800/80"
+                    : "bg-amber-50 border-amber-200"
                 }`}
               >
                 <span className="w-3 h-3 rotate-45 bg-amber-500 shrink-0" />
@@ -994,7 +1023,9 @@ export default function GraphCanvas({
               </div>
               <div
                 className={`flex items-center gap-2 p-1.5 rounded border ${
-                  isDark ? "bg-slate-950/70 border-rose-900/40" : "bg-rose-50 border-rose-200"
+                  isDark
+                    ? "bg-slate-950/70 border-rose-900/40"
+                    : "bg-rose-50 border-rose-200"
                 }`}
               >
                 <span className="w-3 h-3 rotate-45 bg-rose-600 shrink-0" />
@@ -1002,7 +1033,9 @@ export default function GraphCanvas({
               </div>
               <div
                 className={`flex items-center gap-2 p-1.5 rounded border ${
-                  isDark ? "bg-slate-950/70 border-slate-800/80" : "bg-amber-50 border-amber-200"
+                  isDark
+                    ? "bg-slate-950/70 border-slate-800/80"
+                    : "bg-amber-50 border-amber-200"
                 }`}
               >
                 <span className="w-3.5 h-3.5 bg-amber-600 rounded-xs shrink-0" />
@@ -1010,7 +1043,9 @@ export default function GraphCanvas({
               </div>
               <div
                 className={`flex items-center gap-2 p-1.5 rounded border ${
-                  isDark ? "bg-slate-950/70 border-purple-900/40" : "bg-purple-50 border-purple-200"
+                  isDark
+                    ? "bg-slate-950/70 border-purple-900/40"
+                    : "bg-purple-50 border-purple-200"
                 }`}
               >
                 <span className="w-3.5 h-3.5 bg-purple-600 rounded shrink-0" />
@@ -1027,12 +1062,16 @@ export default function GraphCanvas({
             <div className="space-y-1.5 text-[11px]">
               <div
                 className={`flex items-center gap-2.5 p-1.5 rounded border ${
-                  isDark ? "bg-slate-950/70 border-slate-800" : "bg-slate-50 border-slate-200"
+                  isDark
+                    ? "bg-slate-950/70 border-slate-800"
+                    : "bg-slate-50 border-slate-200"
                 }`}
               >
                 <div className="w-7 border-t-2 border-dashed border-pink-500 shrink-0" />
                 <div>
-                  <div className="font-semibold text-pink-500">CORRELATED_WITH (Cap 2)</div>
+                  <div className="font-semibold text-pink-500">
+                    CORRELATED_WITH (Cap 2)
+                  </div>
                   <div className="text-[10px] opacity-70">
                     Cross-market match via NLP stylometry & PGP key.
                   </div>
@@ -1041,12 +1080,16 @@ export default function GraphCanvas({
 
               <div
                 className={`flex items-center gap-2.5 p-1.5 rounded border ${
-                  isDark ? "bg-slate-950/70 border-slate-800" : "bg-slate-50 border-slate-200"
+                  isDark
+                    ? "bg-slate-950/70 border-slate-800"
+                    : "bg-slate-50 border-slate-200"
                 }`}
               >
                 <div className="w-7 border-t-2 border-dashed border-cyan-400 shrink-0" />
                 <div>
-                  <div className="font-semibold text-cyan-500">COORDINATED_WITH (Cap 3)</div>
+                  <div className="font-semibold text-cyan-500">
+                    COORDINATED_WITH (Cap 3)
+                  </div>
                   <div className="text-[10px] opacity-70">
                     Temporal reply cadence, co-posting bursts, and cliques.
                   </div>
@@ -1055,12 +1098,16 @@ export default function GraphCanvas({
 
               <div
                 className={`flex items-center gap-2.5 p-1.5 rounded border ${
-                  isDark ? "bg-slate-950/70 border-slate-800" : "bg-slate-50 border-slate-200"
+                  isDark
+                    ? "bg-slate-950/70 border-slate-800"
+                    : "bg-slate-50 border-slate-200"
                 }`}
               >
                 <div className="w-7 border-t-2 border-dotted border-rose-500 shrink-0" />
                 <div>
-                  <div className="font-semibold text-rose-500">CO_HOSTED_SERVER (Cap 1)</div>
+                  <div className="font-semibold text-rose-500">
+                    CO_HOSTED_SERVER (Cap 1)
+                  </div>
                   <div className="text-[10px] opacity-70">
                     Different onion sites sharing identical TLS/SSH host key.
                   </div>
@@ -1071,7 +1118,9 @@ export default function GraphCanvas({
 
           <div
             className={`pt-2 border-t text-[10px] flex justify-between ${
-              isDark ? "border-slate-800 opacity-60" : "border-slate-200 opacity-70"
+              isDark
+                ? "border-slate-800 opacity-60"
+                : "border-slate-200 opacity-70"
             }`}
           >
             <span>Tip: Click any node to spotlight its direct network.</span>

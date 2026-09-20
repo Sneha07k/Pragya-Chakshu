@@ -86,6 +86,7 @@ def get_ground_truth(case_id: str, limit: int = 100):
         "notice": "This reference data is used exclusively for evaluating correlation accuracy and is isolated from investigator mode.",
         "total_reference_matches_available": len(matches),
         "case_personas_count": len(case_personas),
+        "matches": matches,
         "sample_reference_matches": matches[:20],
     }
 

@@ -11,7 +11,9 @@ export default function EventFeed({ events, theme = "dark" }) {
 
   if (!events || events.length === 0) {
     return (
-      <div className={`p-8 text-center text-xs ${isDark ? "text-slate-500" : "text-slate-400"}`}>
+      <div
+        className={`p-8 text-center text-xs ${isDark ? "text-slate-500" : "text-slate-400"}`}
+      >
         No events ingested yet.
         <br />
         Select a dataset and click Ingest.
@@ -22,7 +24,11 @@ export default function EventFeed({ events, theme = "dark" }) {
   const getIcon = (type) => {
     switch (type) {
       case "post_observed":
-        return <MessageSquare className={`w-3.5 h-3.5 ${isDark ? "text-slate-400" : "text-slate-500"}`} />;
+        return (
+          <MessageSquare
+            className={`w-3.5 h-3.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}
+          />
+        );
       case "vendor_observed":
         return <User className="w-3.5 h-3.5 text-cyan-500" />;
       case "listing_observed":
@@ -58,11 +64,15 @@ export default function EventFeed({ events, theme = "dark" }) {
     if (ev.event_type === "post_observed") {
       return (
         <div>
-          <span className={`font-semibold ${isDark ? "text-cyan-400" : "text-cyan-600"}`}>
+          <span
+            className={`font-semibold ${isDark ? "text-cyan-400" : "text-cyan-600"}`}
+          >
             {p.username || "User"}
           </span>{" "}
           posted:
-          <p className={`text-xs mt-0.5 line-clamp-2 ${isDark ? "text-slate-300" : "text-slate-700"}`}>
+          <p
+            className={`text-xs mt-0.5 line-clamp-2 ${isDark ? "text-slate-300" : "text-slate-700"}`}
+          >
             {p.clean_text || "Post content"}
           </p>
         </div>
@@ -71,13 +81,18 @@ export default function EventFeed({ events, theme = "dark" }) {
     if (ev.event_type === "vendor_observed") {
       return (
         <div>
-          <span className={`font-semibold ${isDark ? "text-violet-400" : "text-violet-600"}`}>
+          <span
+            className={`font-semibold ${isDark ? "text-violet-400" : "text-violet-600"}`}
+          >
             {p.username || "Vendor"}
           </span>{" "}
           <span className="opacity-75">(Rank: {p.rank || "N/A"})</span>
-          <p className={`text-[11px] mt-0.5 ${isDark ? "text-slate-400" : "text-slate-600"}`}>
+          <p
+            className={`text-[11px] mt-0.5 ${isDark ? "text-slate-400" : "text-slate-600"}`}
+          >
             Sales: {p.sales || 0} | Rating: {p.approval_rating || "100%"}
-            {p.identifiers?.length > 0 && ` | Identifiers: ${p.identifiers.length}`}
+            {p.identifiers?.length > 0 &&
+              ` | Identifiers: ${p.identifiers.length}`}
           </p>
         </div>
       );
@@ -85,20 +100,31 @@ export default function EventFeed({ events, theme = "dark" }) {
     if (ev.event_type === "listing_observed") {
       return (
         <div>
-          <span className={`font-medium ${isDark ? "text-emerald-400" : "text-emerald-600"}`}>
+          <span
+            className={`font-medium ${isDark ? "text-emerald-400" : "text-emerald-600"}`}
+          >
             {p.title || "Product Listing"}
           </span>
-          <p className={`text-[11px] mt-0.5 ${isDark ? "text-slate-400" : "text-slate-600"}`}>
-            Price: {p.price ? `${p.price} BTC` : "N/A"} | Class: {p.product_class || "N/A"}
+          <p
+            className={`text-[11px] mt-0.5 ${isDark ? "text-slate-400" : "text-slate-600"}`}
+          >
+            Price: {p.price ? `${p.price} BTC` : "N/A"} | Class:{" "}
+            {p.product_class || "N/A"}
           </p>
         </div>
       );
     }
-    return <span className={isDark ? "text-slate-300" : "text-slate-700"}>{ev.event_type}</span>;
+    return (
+      <span className={isDark ? "text-slate-300" : "text-slate-700"}>
+        {ev.event_type}
+      </span>
+    );
   };
 
   return (
-    <div className={`divide-y ${isDark ? "divide-slate-800/60" : "divide-slate-200"}`}>
+    <div
+      className={`divide-y ${isDark ? "divide-slate-800/60" : "divide-slate-200"}`}
+    >
       {events.map((ev, idx) => (
         <div
           key={idx}
@@ -110,29 +136,33 @@ export default function EventFeed({ events, theme = "dark" }) {
             <div className="flex items-center gap-1.5">
               <div
                 className={`p-1 rounded border ${
-                  isDark ? "bg-slate-950 border-slate-800" : "bg-white border-slate-200 shadow-2xs"
+                  isDark
+                    ? "bg-slate-950 border-slate-800"
+                    : "bg-white border-slate-200 shadow-2xs"
                 }`}
               >
                 {getIcon(ev.event_type)}
               </div>
-              <span className={`text-[11px] font-mono uppercase ${isDark ? "text-slate-400" : "text-slate-600"}`}>
+              <span
+                className={`text-[11px] font-mono uppercase ${isDark ? "text-slate-400" : "text-slate-600"}`}
+              >
                 {ev.event_type?.replace("_observed", "")}
               </span>
             </div>
             <span
               className={`text-[9px] px-1.5 py-0.5 rounded border uppercase tracking-wider font-semibold ${getProvenanceBadge(
-                ev.provenance
+                ev.provenance,
               )}`}
             >
               {ev.provenance || "RAW"}
             </span>
           </div>
 
-          <div className="text-xs mb-1">
-            {getEventSummary(ev)}
-          </div>
+          <div className="text-xs mb-1">{getEventSummary(ev)}</div>
 
-          <div className={`text-[10px] font-mono ${isDark ? "text-slate-500" : "text-slate-400"}`}>
+          <div
+            className={`text-[10px] font-mono ${isDark ? "text-slate-500" : "text-slate-400"}`}
+          >
             {ev.timestamp_occurred
               ? ev.timestamp_occurred.replace("T", " ").replace("Z", " UTC")
               : "No timestamp"}
