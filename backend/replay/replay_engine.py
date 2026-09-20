@@ -13,7 +13,14 @@ def ingest_forum_posts(case_id, limit=20):
     ingested_count = 0
     now = datetime.utcnow().isoformat()
     
-    for post in stream_forum_posts(limit=limit):
+    cursor.execute(
+        "SELECT count(distinct source_record_id) FROM normalized_events WHERE case_id=? AND event_type='post_observed'",
+        (case_id,)
+    )
+    offset_row = cursor.fetchone()
+    offset = offset_row[0] if offset_row else 0
+
+    for post in stream_forum_posts(offset=offset, limit=limit):
         uid = post.get('uid')
         username = get_username_by_uid(uid)
         normalized_event = normalize_post_event(post, case_id, username)
@@ -76,7 +83,14 @@ def ingest_market_vendors(case_id, limit=20):
     ingested_count = 0
     now = datetime.utcnow().isoformat()
     
-    for vendor in stream_market_vendors(limit=limit):
+    cursor.execute(
+        "SELECT count(distinct source_record_id) FROM normalized_events WHERE case_id=? AND event_type='vendor_observed'",
+        (case_id,)
+    )
+    offset_row = cursor.fetchone()
+    offset = offset_row[0] if offset_row else 0
+
+    for vendor in stream_market_vendors(offset=offset, limit=limit):
         vid = vendor.get('vid')
         username = vendor.get('username', '')
         if not username:
@@ -140,7 +154,14 @@ def ingest_market_listings(case_id, limit=20):
     ingested_count = 0
     now = datetime.utcnow().isoformat()
     
-    for listing in stream_market_listings(limit=limit):
+    cursor.execute(
+        "SELECT count(distinct source_record_id) FROM normalized_events WHERE case_id=? AND event_type='listing_observed'",
+        (case_id,)
+    )
+    offset_row = cursor.fetchone()
+    offset = offset_row[0] if offset_row else 0
+
+    for listing in stream_market_listings(offset=offset, limit=limit):
         lid = listing.get('lid')
         vid = listing.get('vid')
         title = listing.get('title', '')

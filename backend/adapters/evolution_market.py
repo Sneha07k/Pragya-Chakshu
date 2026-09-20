@@ -26,7 +26,7 @@ def get_scrape_timestamp(mscrape_id):
     _load_market_scrapes()
     return _scrape_date_cache.get(str(mscrape_id), "2014-01-21T00:00:00Z")
 
-def stream_market_vendors(limit=None):
+def stream_market_vendors(offset=0, limit=None):
     filepath = os.path.join(DATASET_BASE_PATH, 'market', 'vendors.tsv')
     if not os.path.exists(filepath):
         return
@@ -35,7 +35,9 @@ def stream_market_vendors(limit=None):
     count = 0
     with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
         reader = csv.DictReader(f, delimiter='\t')
-        for row in reader:
+        for i, row in enumerate(reader):
+            if i < offset:
+                continue
             if limit and count >= limit:
                 break
             
@@ -44,7 +46,7 @@ def stream_market_vendors(limit=None):
             yield row
             count += 1
 
-def stream_market_listings(limit=None):
+def stream_market_listings(offset=0, limit=None):
     filepath = os.path.join(DATASET_BASE_PATH, 'market', 'listings.tsv')
     if not os.path.exists(filepath):
         return
@@ -53,7 +55,9 @@ def stream_market_listings(limit=None):
     count = 0
     with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
         reader = csv.DictReader(f, delimiter='\t')
-        for row in reader:
+        for i, row in enumerate(reader):
+            if i < offset:
+                continue
             if limit and count >= limit:
                 break
             

@@ -71,8 +71,19 @@ class ReplayController:
                 self.active_listeners.remove(dq)
 
     async def run_replay_loop(self):
-        # Fetch pre-sorted chronological events from dataset
-        posts_generator = stream_forum_posts(limit=100)
+        # Compute how many distinct posts already exist in this case so replay streams NEW unseen observations
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT count(distinct source_record_id) FROM normalized_events WHERE case_id=? AND event_type='post_observed'",
+            (self.case_id,)
+        )
+        offset_row = cursor.fetchone()
+        offset = offset_row[0] if offset_row else 0
+        conn.close()
+
+        # Fetch pre-sorted chronological events from dataset starting at the offset
+        posts_generator = stream_forum_posts(offset=offset, limit=1000)
         
         while self.status == "RUNNING":
             try:

@@ -21,7 +21,7 @@ def get_username_by_uid(uid):
     _load_user_cache()
     return _user_cache.get(str(uid), f"Unknown_{uid}")
 
-def stream_forum_posts(limit=None):
+def stream_forum_posts(offset=0, limit=None):
     filepath = os.path.join(DATASET_BASE_PATH, 'forum', 'post.tsv')
     if not os.path.exists(filepath):
         return
@@ -29,7 +29,9 @@ def stream_forum_posts(limit=None):
     count = 0
     with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
         reader = csv.DictReader(f, delimiter='\t')
-        for row in reader:
+        for i, row in enumerate(reader):
+            if i < offset:
+                continue
             if limit and count >= limit:
                 break
             
