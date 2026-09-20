@@ -23,6 +23,15 @@ import {
   Download,
   FileText,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Sun,
+  Moon,
+  Sliders,
+  PanelLeftClose,
+  PanelLeftOpen,
+  PanelRightClose,
+  PanelRightOpen,
 } from "lucide-react";
 import {
   getCaseGraph,
@@ -44,7 +53,14 @@ import EventFeed from "./EventFeed";
 import NodeInspector from "./NodeInspector";
 import CorrelationInspector from "./CorrelationInspector";
 
-export default function Workspace({ caseData, onBack }) {
+export default function Workspace({
+  caseData,
+  onBack,
+  theme = "dark",
+  onToggleTheme,
+}) {
+  const isDark = theme === "dark";
+
   const [graphData, setGraphData] = useState({ nodes: [], edges: [] });
   const [events, setEvents] = useState([]);
   const [selectedNode, setSelectedNode] = useState(null);
@@ -56,6 +72,11 @@ export default function Workspace({ caseData, onBack }) {
   const [ingestLimit, setIngestLimit] = useState(20);
   const [evaluationMode, setEvaluationMode] = useState(false);
   const [groundTruthData, setGroundTruthData] = useState(null);
+
+  // Investigator Drawer States
+  const [leftDrawerOpen, setLeftDrawerOpen] = useState(true);
+  const [rightDrawerOpen, setRightDrawerOpen] = useState(true);
+  const [leftTab, setLeftTab] = useState("feed"); // 'feed' | 'ingest' | 'replay'
 
   // Time-Cursor Replay State
   const [replayStatus, setReplayStatus] = useState("STOPPED");
@@ -112,7 +133,6 @@ export default function Workspace({ caseData, onBack }) {
         if (data.event) {
           setEvents((prev) => [data.event, ...prev]);
         }
-        // Refresh graph periodically
         loadData();
       } catch (e) {
         console.error("Error processing SSE observation", e);
@@ -202,7 +222,7 @@ export default function Workspace({ caseData, onBack }) {
   const [benchmarkData, setBenchmarkData] = useState(null);
   const [benchmarkThreshold, setBenchmarkThreshold] = useState(10.0);
   const [loadingBenchmark, setLoadingBenchmark] = useState(false);
-  const [evalActiveTab, setEvalActiveTab] = useState("benchmark"); // "benchmark" | "reference"
+  const [evalActiveTab, setEvalActiveTab] = useState("benchmark");
 
   const loadBenchmark = async (thresh = benchmarkThreshold) => {
     setLoadingBenchmark(true);
@@ -278,128 +298,178 @@ export default function Workspace({ caseData, onBack }) {
       ?.length || 0;
 
   return (
-    <div className="h-screen flex flex-col bg-slate-950 overflow-hidden">
-      {/* Top Bar */}
-      <header className="h-14 border-b border-slate-800 bg-slate-900 flex items-center justify-between px-4 shrink-0">
-        <div className="flex items-center gap-4">
+    <div
+      className={`h-screen flex flex-col overflow-hidden transition-colors duration-200 ${
+        isDark ? "bg-slate-950 text-slate-100" : "bg-slate-50 text-slate-900"
+      }`}
+    >
+      {/* TOP NAVIGATION WORKBAR */}
+      <header
+        className={`h-14 border-b flex items-center justify-between px-4 shrink-0 transition-colors z-20 ${
+          isDark
+            ? "bg-slate-900/95 border-slate-800 text-slate-100"
+            : "bg-white border-slate-200 text-slate-800 shadow-2xs"
+        }`}
+      >
+        {/* Left: Back & Case Title */}
+        <div className="flex items-center gap-3">
           <button
             onClick={onBack}
-            className="text-slate-400 hover:text-slate-100 transition-colors flex items-center gap-1 text-sm font-medium"
+            className={`transition-colors flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded border ${
+              isDark
+                ? "border-slate-800 text-slate-400 hover:text-slate-100 hover:bg-slate-800"
+                : "border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+            }`}
           >
-            <ArrowLeft className="w-4 h-4" /> Back to Cases
+            <ArrowLeft className="w-3.5 h-3.5" /> Back
           </button>
-          <div className="h-4 w-px bg-slate-700"></div>
-          <h1 className="font-semibold text-slate-200">{caseData.name}</h1>
-          <span className="text-xs bg-cyan-900/30 text-cyan-400 border border-cyan-800/50 px-2 py-0.5 rounded-full">
-            {caseData.status || "INVESTIGATING"}
-          </span>
+
+          <div className="h-4 w-px bg-slate-300 dark:bg-slate-800 mx-0.5"></div>
+
+          <div className="flex items-center gap-2">
+            <h1 className="font-bold text-sm tracking-tight truncate max-w-[200px]">
+              {caseData.name}
+            </h1>
+            <span
+              className={`text-[10px] px-2 py-0.5 rounded-full font-mono uppercase font-semibold border ${
+                caseData.status === "ACTIVE"
+                  ? "bg-emerald-900/30 text-emerald-400 border-emerald-800/50"
+                  : "bg-cyan-900/30 text-cyan-400 border-cyan-800/50"
+              }`}
+            >
+              {caseData.status || "OPEN"}
+            </span>
+          </div>
         </div>
 
-        {/* Center: Graph Quick Stats */}
-        <div className="hidden md:flex items-center gap-4 text-xs text-slate-400">
-          <span className="flex items-center gap-1.5">
+        {/* Center: Investigator KPI Pills */}
+        <div className="hidden lg:flex items-center gap-3 text-xs">
+          <span
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-[11px] font-medium ${
+              isDark ? "bg-slate-950 border-slate-800" : "bg-slate-100 border-slate-200"
+            }`}
+          >
             <span className="w-2 h-2 rounded-full bg-cyan-400"></span>
-            Personas:{" "}
-            <strong className="text-slate-200">{personasCount}</strong>
+            Personas: <strong className="ml-0.5">{personasCount}</strong>
           </span>
-          <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-slate-400"></span>
-            Posts: <strong className="text-slate-200">{postsCount}</strong>
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-            Listings:{" "}
-            <strong className="text-slate-200">{listingsCount}</strong>
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-rose-500"></span>
-            Servers: <strong className="text-slate-200">{serversCount}</strong>
-          </span>
-          <span className="flex items-center gap-1.5">
+
+          <span
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-[11px] font-medium ${
+              isDark ? "bg-slate-950 border-slate-800" : "bg-slate-100 border-slate-200"
+            }`}
+          >
             <span className="w-2 h-2 rounded-full bg-pink-400"></span>
-            Correlations:{" "}
-            <strong className="text-slate-200">{correlationsCount}</strong>
+            Attributions: <strong className="ml-0.5">{correlationsCount}</strong>
           </span>
-          <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-cyan-400"></span>
-            Coordinated:{" "}
-            <strong className="text-slate-200">{coordinatedCount}</strong>
+
+          <span
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-[11px] font-medium ${
+              isDark ? "bg-slate-950 border-slate-800" : "bg-slate-100 border-slate-200"
+            }`}
+          >
+            <span className="w-2 h-2 rounded-full bg-blue-400"></span>
+            Events: <strong className="ml-0.5">{events.length}</strong>
           </span>
         </div>
 
-        {/* Right: Actions */}
-        <div className="flex items-center gap-2.5">
+        {/* Right: Core Capability Actions & Theme Toggle */}
+        <div className="flex items-center gap-2">
           <button
             onClick={handleDetectCoordination}
             disabled={detectingCoord}
-            className="text-xs bg-cyan-900/30 hover:bg-cyan-900/50 text-cyan-300 border border-cyan-700 px-2.5 py-1.5 rounded-md font-medium transition-colors flex items-center gap-1.5 disabled:opacity-50"
+            className={`text-xs px-2.5 py-1.5 rounded-md font-medium border transition-colors flex items-center gap-1.5 disabled:opacity-50 cursor-pointer ${
+              isDark
+                ? "bg-cyan-950/40 text-cyan-300 border-cyan-800/80 hover:bg-cyan-900/50"
+                : "bg-cyan-50 text-cyan-700 border-cyan-300 hover:bg-cyan-100"
+            }`}
             title="Detect Coordinated Activity (Capability 3)"
           >
             <Users
-              className={`w-3.5 h-3.5 text-cyan-400 ${detectingCoord ? "animate-spin" : ""}`}
+              className={`w-3.5 h-3.5 text-cyan-500 ${detectingCoord ? "animate-spin" : ""}`}
             />
-            {detectingCoord ? "Analyzing..." : "Coordination"}
+            <span>{detectingCoord ? "Analyzing..." : "Coordination"}</span>
           </button>
 
           <button
             onClick={handleGenerateInfra}
             disabled={generatingInfra}
-            className="text-xs bg-rose-900/30 hover:bg-rose-900/50 text-rose-300 border border-rose-700 px-2.5 py-1.5 rounded-md font-medium transition-colors flex items-center gap-1.5 disabled:opacity-50"
+            className={`text-xs px-2.5 py-1.5 rounded-md font-medium border transition-colors flex items-center gap-1.5 disabled:opacity-50 cursor-pointer ${
+              isDark
+                ? "bg-rose-950/40 text-rose-300 border-rose-800/80 hover:bg-rose-900/50"
+                : "bg-rose-50 text-rose-700 border-rose-300 hover:bg-rose-100"
+            }`}
             title="Generate controlled synthetic infrastructure cluster (Capability 1)"
           >
             <Server
-              className={`w-3.5 h-3.5 text-rose-400 ${generatingInfra ? "animate-spin" : ""}`}
+              className={`w-3.5 h-3.5 text-rose-500 ${generatingInfra ? "animate-spin" : ""}`}
             />
-            {generatingInfra ? "Generating..." : "+ Synthetic Cluster"}
+            <span>{generatingInfra ? "Generating..." : "+ Infra"}</span>
           </button>
 
           <button
             onClick={handleRunCorrelation}
             disabled={correlating}
-            className="text-xs bg-pink-900/30 hover:bg-pink-900/50 text-pink-300 border border-pink-700 px-2.5 py-1.5 rounded-md font-medium transition-colors flex items-center gap-1.5 disabled:opacity-50"
-            title="Scan personas for multi-factor correlations"
+            className={`text-xs px-2.5 py-1.5 rounded-md font-medium border transition-colors flex items-center gap-1.5 disabled:opacity-50 cursor-pointer ${
+              isDark
+                ? "bg-pink-950/40 text-pink-300 border-pink-800/80 hover:bg-pink-900/50"
+                : "bg-pink-50 text-pink-700 border-pink-300 hover:bg-pink-100"
+            }`}
+            title="Run multi-signal persona correlation engine (Capability 2)"
           >
             <Sparkles
-              className={`w-3.5 h-3.5 text-pink-400 ${correlating ? "animate-spin" : ""}`}
+              className={`w-3.5 h-3.5 text-pink-500 ${correlating ? "animate-spin" : ""}`}
             />
-            {correlating ? "Evaluating..." : "Correlate"}
+            <span>{correlating ? "Scanning..." : "Correlate"}</span>
           </button>
 
           <button
             onClick={handleToggleEvaluation}
-            className={`text-xs px-3 py-1.5 rounded-md font-medium border transition-colors flex items-center gap-1.5 ${
+            className={`text-xs px-3 py-1.5 rounded-md font-medium border transition-colors flex items-center gap-1.5 cursor-pointer ${
               evaluationMode
-                ? "bg-purple-900/40 text-purple-300 border-purple-700 hover:bg-purple-900/60"
-                : "bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200"
+                ? "bg-purple-600 text-white border-purple-500 shadow-sm"
+                : isDark
+                ? "bg-purple-950/40 text-purple-300 border-purple-800 hover:bg-purple-900/60"
+                : "bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100"
             }`}
-            title="Toggle Evaluation Mode (Ground Truth Reference)"
+            title="Evaluation Mode: Benchmark Precision/Recall against hidden Ground Truth"
           >
-            <ShieldCheck className="w-3.5 h-3.5 text-purple-400" />
-            Evaluation Mode
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span>Evaluation</span>
           </button>
 
           {/* Export Dossier Menu */}
           <div className="relative">
             <button
               onClick={() => setShowExportMenu(!showExportMenu)}
-              className="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-2.5 py-1.5 rounded-md font-medium transition-colors flex items-center gap-1.5"
-              title="Export Forensic Case Dossier"
+              className={`text-xs px-2.5 py-1.5 rounded-md font-medium border transition-colors flex items-center gap-1.5 cursor-pointer ${
+                isDark
+                  ? "bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700"
+                  : "bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-300"
+              }`}
             >
-              <Download className="w-3.5 h-3.5 text-cyan-400" />
-              Export
-              <ChevronDown className="w-3 h-3 text-slate-400" />
+              <Download className="w-3.5 h-3.5 text-cyan-500" />
+              <span>Export</span>
+              <ChevronDown className="w-3 h-3 opacity-60" />
             </button>
 
             {showExportMenu && (
-              <div className="absolute right-0 mt-1 w-56 bg-slate-900 border border-slate-700 rounded-md shadow-xl py-1 z-50">
+              <div
+                className={`absolute right-0 mt-1 w-56 rounded-lg shadow-xl py-1 z-50 border backdrop-blur ${
+                  isDark
+                    ? "bg-slate-900/95 border-slate-700 text-slate-200"
+                    : "bg-white/95 border-slate-200 text-slate-800"
+                }`}
+              >
                 <a
                   href={getCaseExportDossierUrl(caseData.case_id)}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => setShowExportMenu(false)}
-                  className="px-3 py-2 text-xs text-slate-200 hover:bg-slate-800 flex items-center gap-2"
+                  className={`px-3 py-2 text-xs flex items-center gap-2 transition-colors ${
+                    isDark ? "hover:bg-slate-800 text-slate-200" : "hover:bg-slate-100 text-slate-800"
+                  }`}
                 >
-                  <FileText className="w-3.5 h-3.5 text-cyan-400" />
+                  <FileText className="w-3.5 h-3.5 text-cyan-500" />
                   Printable Forensic Dossier (HTML)
                 </a>
                 <a
@@ -407,259 +477,460 @@ export default function Workspace({ caseData, onBack }) {
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => setShowExportMenu(false)}
-                  className="px-3 py-2 text-xs text-slate-200 hover:bg-slate-800 flex items-center gap-2"
+                  className={`px-3 py-2 text-xs flex items-center gap-2 transition-colors ${
+                    isDark ? "hover:bg-slate-800 text-slate-200" : "hover:bg-slate-100 text-slate-800"
+                  }`}
                 >
-                  <Download className="w-3.5 h-3.5 text-emerald-400" />
+                  <Download className="w-3.5 h-3.5 text-emerald-500" />
                   Structured Case JSON
                 </a>
               </div>
             )}
           </div>
 
-          <button
-            onClick={loadData}
-            disabled={loading}
-            className="p-1.5 text-slate-400 hover:text-slate-200 transition-colors rounded hover:bg-slate-800"
-            title="Refresh Graph"
-          >
-            <RefreshCw
-              className={`w-4 h-4 ${loading ? "animate-spin text-cyan-400" : ""}`}
-            />
-          </button>
+          <div className="h-4 w-px bg-slate-300 dark:bg-slate-800 mx-0.5"></div>
+
+          {/* Theme Toggle Button */}
+          {onToggleTheme && (
+            <button
+              onClick={onToggleTheme}
+              className={`p-1.5 rounded-md border transition-colors cursor-pointer ${
+                isDark
+                  ? "bg-slate-950 border-slate-800 text-slate-400 hover:text-amber-400 hover:bg-slate-800"
+                  : "bg-white border-slate-200 text-slate-600 hover:text-blue-600 hover:bg-slate-100 shadow-2xs"
+              }`}
+              title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            >
+              {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-blue-600" />}
+            </button>
+          )}
+
+          {/* Panel Toggle Shortcuts */}
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setLeftDrawerOpen(!leftDrawerOpen)}
+              className={`p-1.5 rounded-md border transition-colors cursor-pointer ${
+                leftDrawerOpen
+                  ? isDark
+                    ? "bg-slate-800 text-cyan-400 border-cyan-800"
+                    : "bg-slate-100 text-cyan-700 border-cyan-300"
+                  : isDark
+                  ? "bg-slate-950 border-slate-800 text-slate-500 hover:text-slate-300"
+                  : "bg-white border-slate-200 text-slate-400 hover:text-slate-700"
+              }`}
+              title={leftDrawerOpen ? "Collapse Activity Sidebar" : "Expand Activity Sidebar"}
+            >
+              {leftDrawerOpen ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeftOpen className="w-4 h-4" />}
+            </button>
+
+            <button
+              onClick={() => setRightDrawerOpen(!rightDrawerOpen)}
+              className={`p-1.5 rounded-md border transition-colors cursor-pointer ${
+                rightDrawerOpen
+                  ? isDark
+                    ? "bg-slate-800 text-cyan-400 border-cyan-800"
+                    : "bg-slate-100 text-cyan-700 border-cyan-300"
+                  : isDark
+                  ? "bg-slate-950 border-slate-800 text-slate-500 hover:text-slate-300"
+                  : "bg-white border-slate-200 text-slate-400 hover:text-slate-700"
+              }`}
+              title={rightDrawerOpen ? "Collapse Forensic Inspector" : "Expand Forensic Inspector"}
+            >
+              {rightDrawerOpen ? <PanelRightClose className="w-4 h-4" /> : <PanelRightOpen className="w-4 h-4" />}
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* Time-Cursor Replay Toolbar */}
-      <div className="bg-slate-900/90 border-b border-slate-800 px-4 py-2 flex items-center justify-between text-xs shrink-0">
-        <div className="flex items-center gap-3">
-          <span className="font-semibold text-slate-300 flex items-center gap-1.5">
-            <Clock className="w-3.5 h-3.5 text-cyan-400" /> Time-Cursor Replay
-          </span>
-
-          <span
-            className={`text-[10px] px-2 py-0.5 rounded font-mono font-semibold uppercase ${
-              replayStatus === "RUNNING"
-                ? "bg-emerald-900/40 text-emerald-400 border border-emerald-700 animate-pulse"
-                : replayStatus === "PAUSED"
-                  ? "bg-amber-900/40 text-amber-400 border border-amber-700"
-                  : "bg-slate-800 text-slate-400 border border-slate-700"
-            }`}
-          >
-            {replayStatus}
-          </span>
-
-          {/* Controls */}
-          <div className="flex items-center gap-1 bg-slate-950 p-0.5 rounded border border-slate-800">
-            {replayStatus === "RUNNING" ? (
-              <button
-                onClick={handlePauseReplay}
-                className="p-1 hover:bg-slate-800 text-amber-400 rounded transition-colors"
-                title="Pause Replay"
-              >
-                <Pause className="w-3.5 h-3.5" />
-              </button>
-            ) : (
-              <button
-                onClick={handlePlayReplay}
-                className="p-1 hover:bg-slate-800 text-emerald-400 rounded transition-colors"
-                title="Play Chronological Replay"
-              >
-                <Play className="w-3.5 h-3.5" />
-              </button>
-            )}
-
-            <button
-              onClick={handleStopReplay}
-              className="p-1 hover:bg-slate-800 text-slate-400 hover:text-slate-200 rounded transition-colors"
-              title="Stop / Reset Cursor"
-            >
-              <Square className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          {/* Speed Multiplier */}
-          <div className="flex items-center gap-1 text-[11px] text-slate-400">
-            <FastForward className="w-3 h-3" />
-            <span>Speed:</span>
-            {[1, 5, 20, 60].map((s) => (
-              <button
-                key={s}
-                onClick={() => handleSpeedChange(s)}
-                className={`px-1.5 py-0.5 rounded text-[10px] font-mono transition-colors ${
-                  replaySpeed === s
-                    ? "bg-cyan-600 text-white font-bold"
-                    : "bg-slate-800 text-slate-400 hover:text-slate-200"
-                }`}
-              >
-                {s}x
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Current Time Cursor Display */}
-        <div className="flex items-center gap-4 text-xs font-mono">
-          <div className="flex items-center gap-1.5 text-slate-300">
-            <span className="text-slate-500">Historical Cursor:</span>
-            <span className="text-cyan-400 font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
-              {replayCursor
-                ? replayCursor.replace("T", " ").replace("Z", " UTC")
-                : "1970-01-01 00:00:00 UTC (IDLE)"}
-            </span>
-          </div>
-
-          <div className="text-slate-500 text-[11px]">
-            Replayed:{" "}
-            <strong className="text-slate-300">{eventsReplayedCount}</strong>{" "}
-            events
-          </div>
-        </div>
-      </div>
-
-      {/* Evaluation Mode Banner */}
+      {/* Evaluation Mode Active Banner */}
       {evaluationMode && (
-        <div className="bg-purple-950/70 border-b border-purple-800/80 px-4 py-2 flex items-center justify-between text-xs text-purple-200 shrink-0">
+        <div className="bg-purple-950/70 border-b border-purple-800/80 px-4 py-1.5 flex items-center justify-between text-xs text-purple-200 shrink-0 z-10 backdrop-blur">
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-purple-400 shrink-0" />
             <span>
-              <strong>EVALUATION MODE ACTIVE:</strong> Showing historical
-              ground-truth references from verified Evolution cross-platform
-              matching archive. Isolated from analytical correlation engine.
+              <strong>EVALUATION BENCHMARK ACTIVE:</strong> Evaluating analytical
+              hypotheses against hidden historical ground truth.
             </span>
           </div>
-          <span className="text-[11px] font-mono bg-purple-900/60 px-2 py-0.5 rounded border border-purple-700">
-            PROVENANCE: EVALUATION_GROUND_TRUTH
-          </span>
+          <button
+            onClick={() => setEvaluationMode(false)}
+            className="text-[11px] underline hover:text-white cursor-pointer"
+          >
+            Return to Investigation Graph
+          </button>
         </div>
       )}
 
-      {/* Three Panel Layout */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* LEFT SIDEBAR: Ingest Controls & Event Feed */}
-        <aside className="w-80 border-r border-slate-800 bg-slate-900/50 flex flex-col">
-          <div className="p-3 border-b border-slate-800 space-y-2">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                <Layers className="w-3.5 h-3.5 text-cyan-400" /> Batch Ingestion
-              </h2>
-            </div>
-
-            <div className="flex gap-2">
-              <select
-                value={ingestSource}
-                onChange={(e) => setIngestSource(e.target.value)}
-                className="flex-1 bg-slate-950 text-slate-200 text-xs rounded border border-slate-700 px-2 py-1 focus:outline-none focus:border-cyan-500"
-              >
-                <option value="forum">Forum Posts (post.tsv)</option>
-                <option value="vendors">Market Vendors (vendors.tsv)</option>
-                <option value="listings">Listings (listings.tsv)</option>
-                <option value="all">All Datasets (Combined)</option>
-              </select>
-
-              <select
-                value={ingestLimit}
-                onChange={(e) => setIngestLimit(e.target.value)}
-                className="w-16 bg-slate-950 text-slate-200 text-xs rounded border border-slate-700 px-1 py-1 focus:outline-none focus:border-cyan-500"
-              >
-                <option value={10}>10</option>
-                <option value={20}>20</option>
-                <option value={50}>50</option>
-              </select>
-            </div>
-
-            <button
-              onClick={handleIngest}
-              disabled={ingesting}
-              className="w-full bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 text-white text-xs py-1.5 rounded font-medium transition-colors flex items-center justify-center gap-1"
+      {/* THREE-PANEL INVESTIGATION WORKSPACE */}
+      <div className="flex-1 flex overflow-hidden relative">
+        {/* LEFT DRAWER (Feed / Ingest / Replay) */}
+        {leftDrawerOpen ? (
+          <aside
+            className={`w-[340px] border-r flex flex-col shrink-0 transition-all duration-200 z-10 ${
+              isDark ? "bg-slate-900/70 border-slate-800" : "bg-white border-slate-200 shadow-sm"
+            }`}
+          >
+            {/* Drawer Header with Tabs */}
+            <div
+              className={`p-2 border-b flex items-center justify-between ${
+                isDark ? "border-slate-800 bg-slate-950/60" : "border-slate-200 bg-slate-50"
+              }`}
             >
-              {ingesting ? (
-                <>
-                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />{" "}
-                  Ingesting...
-                </>
-              ) : (
-                <>
-                  <Database className="w-3.5 h-3.5" /> Ingest Dataset Slice
-                </>
-              )}
-            </button>
-          </div>
+              <div className="flex items-center gap-1 text-xs">
+                <button
+                  onClick={() => setLeftTab("feed")}
+                  className={`px-2.5 py-1 rounded font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
+                    leftTab === "feed"
+                      ? "bg-cyan-600 text-white shadow-xs"
+                      : isDark
+                      ? "text-slate-400 hover:text-slate-200"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  <Activity className="w-3.5 h-3.5" />
+                  <span>Feed ({events.length})</span>
+                </button>
 
-          <div className="p-2 border-b border-slate-800 flex justify-between items-center bg-slate-900/30">
-            <span className="text-xs font-medium text-slate-400 flex items-center gap-1.5">
-              <Activity className="w-3.5 h-3.5 text-cyan-500" /> Live
-              Observation Feed
-            </span>
-            <span className="text-[10px] text-slate-500 font-mono">
-              {events.length} events
-            </span>
-          </div>
+                <button
+                  onClick={() => setLeftTab("ingest")}
+                  className={`px-2.5 py-1 rounded font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
+                    leftTab === "ingest"
+                      ? "bg-cyan-600 text-white shadow-xs"
+                      : isDark
+                      ? "text-slate-400 hover:text-slate-200"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  <Layers className="w-3.5 h-3.5" />
+                  <span>Ingest</span>
+                </button>
 
-          <div className="flex-1 overflow-y-auto">
-            <EventFeed events={events} />
-          </div>
-        </aside>
+                <button
+                  onClick={() => setLeftTab("replay")}
+                  className={`px-2.5 py-1 rounded font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
+                    leftTab === "replay"
+                      ? "bg-cyan-600 text-white shadow-xs"
+                      : isDark
+                      ? "text-slate-400 hover:text-slate-200"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  <Clock className="w-3.5 h-3.5" />
+                  <span>Replay</span>
+                  {replayStatus === "RUNNING" && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  )}
+                </button>
+              </div>
 
-        {/* CENTER: Graph Canvas or Evaluation Ground Truth Panel */}
-        <main className="flex-1 relative bg-slate-950 flex flex-col">
-          {evaluationMode ? (
-            <div className="flex-1 p-6 overflow-y-auto space-y-5">
-              {/* Header & Tabs */}
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                <div>
-                  <h2 className="text-lg font-bold text-slate-100 flex items-center gap-2">
-                    <ShieldCheck className="w-5 h-5 text-purple-400" />
-                    Capability 2: Evaluation Mode & Benchmark
-                  </h2>
-                  <p className="text-xs text-slate-400 mt-0.5">
-                    Evaluates multi-signal persona attribution against
-                    historical ground-truth pairs (
-                    <code className="text-purple-300">user-matching.tsv</code>).
+              <button
+                onClick={() => setLeftDrawerOpen(false)}
+                className="p-1 rounded opacity-60 hover:opacity-100 transition-opacity cursor-pointer"
+                title="Collapse Sidebar"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Tab 1: Live Observation Feed */}
+            {leftTab === "feed" && (
+              <div className="flex-1 overflow-y-auto">
+                <EventFeed events={events} theme={theme} />
+              </div>
+            )}
+
+            {/* Tab 2: Batch Dataset Ingestion */}
+            {leftTab === "ingest" && (
+              <div className="p-4 space-y-4 overflow-y-auto flex-1">
+                <div className="space-y-1">
+                  <h3 className="text-xs font-semibold uppercase tracking-wider opacity-70 flex items-center gap-1.5">
+                    <Database className="w-4 h-4 text-cyan-500" /> Historical Dataset Source
+                  </h3>
+                  <p className="text-[11px] opacity-70">
+                    Stream slices from authentic Evolution forum and marketplace research archives.
                   </p>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <div className="bg-slate-900 border border-slate-800 rounded p-0.5 flex text-xs">
-                    <button
-                      onClick={() => setEvalActiveTab("benchmark")}
-                      className={`px-3 py-1 rounded transition-colors font-medium ${
-                        evalActiveTab === "benchmark"
-                          ? "bg-purple-600 text-white"
-                          : "text-slate-400 hover:text-slate-200"
+                <div className="space-y-2">
+                  <label className="block text-xs font-medium opacity-80">Dataset</label>
+                  <select
+                    value={ingestSource}
+                    onChange={(e) => setIngestSource(e.target.value)}
+                    className={`w-full text-xs rounded-md border px-2.5 py-2 focus:outline-none focus:border-cyan-500 ${
+                      isDark
+                        ? "bg-slate-950 border-slate-700 text-slate-200"
+                        : "bg-slate-50 border-slate-300 text-slate-800"
+                    }`}
+                  >
+                    <option value="forum">Forum Posts (post.tsv)</option>
+                    <option value="vendors">Market Vendors (vendors.tsv)</option>
+                    <option value="listings">Market Listings (listings.tsv)</option>
+                    <option value="all">All Datasets (Combined Ingestion)</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-xs font-medium opacity-80">Batch Size</label>
+                  <select
+                    value={ingestLimit}
+                    onChange={(e) => setIngestLimit(e.target.value)}
+                    className={`w-full text-xs rounded-md border px-2.5 py-2 focus:outline-none focus:border-cyan-500 ${
+                      isDark
+                        ? "bg-slate-950 border-slate-700 text-slate-200"
+                        : "bg-slate-50 border-slate-300 text-slate-800"
+                    }`}
+                  >
+                    <option value={10}>10 records</option>
+                    <option value={20}>20 records</option>
+                    <option value={50}>50 records</option>
+                  </select>
+                </div>
+
+                <button
+                  onClick={handleIngest}
+                  disabled={ingesting}
+                  className="w-full bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 text-white text-xs py-2.5 rounded-md font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                >
+                  {ingesting ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin" /> Ingesting Dataset...
+                    </>
+                  ) : (
+                    <>
+                      <Database className="w-4 h-4" /> Ingest Dataset Slice
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
+
+            {/* Tab 3: Time-Cursor Replay Controls */}
+            {leftTab === "replay" && (
+              <div className="p-4 space-y-4 overflow-y-auto flex-1">
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xs font-semibold uppercase tracking-wider opacity-70 flex items-center gap-1.5">
+                      <Clock className="w-4 h-4 text-cyan-500" /> Chronological Replay
+                    </h3>
+                    <span
+                      className={`text-[10px] px-2 py-0.5 rounded font-mono font-semibold uppercase border ${
+                        replayStatus === "RUNNING"
+                          ? "bg-emerald-900/40 text-emerald-400 border-emerald-700 animate-pulse"
+                          : replayStatus === "PAUSED"
+                          ? "bg-amber-900/40 text-amber-400 border-amber-700"
+                          : "bg-slate-800 text-slate-400 border-slate-700"
                       }`}
                     >
-                      Benchmark Metrics
-                    </button>
-                    <button
-                      onClick={() => setEvalActiveTab("reference")}
-                      className={`px-3 py-1 rounded transition-colors font-medium ${
-                        evalActiveTab === "reference"
-                          ? "bg-purple-600 text-white"
-                          : "text-slate-400 hover:text-slate-200"
-                      }`}
-                    >
-                      Ground Truth Reference
-                    </button>
+                      {replayStatus}
+                    </span>
                   </div>
+                  <p className="text-[11px] opacity-70">
+                    Advances time cursor across authentic historical timestamps via SSE.
+                  </p>
+                </div>
+
+                {/* Play / Pause / Stop Buttons */}
+                <div
+                  className={`p-2.5 rounded-lg border flex items-center justify-center gap-2 ${
+                    isDark ? "bg-slate-950 border-slate-800" : "bg-slate-100 border-slate-200"
+                  }`}
+                >
+                  {replayStatus === "RUNNING" ? (
+                    <button
+                      onClick={handlePauseReplay}
+                      className="flex-1 py-2 px-3 bg-amber-600 hover:bg-amber-500 text-white rounded font-medium text-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      <Pause className="w-4 h-4" /> Pause
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handlePlayReplay}
+                      className="flex-1 py-2 px-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded font-medium text-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      <Play className="w-4 h-4" /> Start Replay
+                    </button>
+                  )}
+
+                  <button
+                    onClick={handleStopReplay}
+                    className={`py-2 px-3 rounded font-medium text-xs flex items-center justify-center gap-1.5 border cursor-pointer ${
+                      isDark
+                        ? "bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700"
+                        : "bg-white hover:bg-slate-200 text-slate-700 border-slate-300"
+                    }`}
+                  >
+                    <Square className="w-4 h-4" /> Reset
+                  </button>
+                </div>
+
+                {/* Speed Multiplier */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-xs opacity-80">
+                    <span>Replay Acceleration</span>
+                    <span className="font-mono font-semibold text-cyan-500">{replaySpeed}x</span>
+                  </div>
+                  <div className="grid grid-cols-4 gap-1.5">
+                    {[1, 5, 20, 60].map((s) => (
+                      <button
+                        key={s}
+                        onClick={() => handleSpeedChange(s)}
+                        className={`py-1.5 rounded text-xs font-mono font-semibold transition-colors cursor-pointer border ${
+                          replaySpeed === s
+                            ? "bg-cyan-600 text-white border-cyan-500 shadow-xs"
+                            : isDark
+                            ? "bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200"
+                            : "bg-white border-slate-200 text-slate-600 hover:text-slate-900"
+                        }`}
+                      >
+                        {s}x
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Historical Cursor Display */}
+                <div
+                  className={`p-3 rounded-lg border space-y-1 ${
+                    isDark ? "bg-slate-950 border-slate-800" : "bg-slate-100 border-slate-200"
+                  }`}
+                >
+                  <div className="text-[10px] uppercase font-semibold opacity-60">Historical Cursor</div>
+                  <div className="text-xs font-mono font-bold text-cyan-500 truncate">
+                    {replayCursor
+                      ? replayCursor.replace("T", " ").replace("Z", " UTC")
+                      : "1970-01-01 00:00:00 UTC (IDLE)"}
+                  </div>
+                  <div className="text-[11px] opacity-70">
+                    Replayed: <strong>{eventsReplayedCount}</strong> events
+                  </div>
+                </div>
+              </div>
+            )}
+          </aside>
+        ) : (
+          /* Collapsed Left Icon Rail */
+          <aside
+            className={`w-12 border-r flex flex-col items-center py-3 gap-3 shrink-0 z-10 transition-colors ${
+              isDark ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200 shadow-2xs"
+            }`}
+          >
+            <button
+              onClick={() => setLeftDrawerOpen(true)}
+              className="p-2 rounded opacity-70 hover:opacity-100 cursor-pointer"
+              title="Expand Activity Drawer"
+            >
+              <ChevronRight className="w-4 h-4 text-cyan-500" />
+            </button>
+
+            <button
+              onClick={() => {
+                setLeftTab("feed");
+                setLeftDrawerOpen(true);
+              }}
+              className="p-2 rounded opacity-70 hover:opacity-100 cursor-pointer relative"
+              title={`Live Feed (${events.length})`}
+            >
+              <Activity className="w-4 h-4 text-cyan-500" />
+              {events.length > 0 && (
+                <span className="w-2 h-2 rounded-full bg-cyan-500 absolute top-1 right-1" />
+              )}
+            </button>
+
+            <button
+              onClick={() => {
+                setLeftTab("ingest");
+                setLeftDrawerOpen(true);
+              }}
+              className="p-2 rounded opacity-70 hover:opacity-100 cursor-pointer"
+              title="Dataset Ingestion"
+            >
+              <Database className="w-4 h-4 text-blue-500" />
+            </button>
+
+            <button
+              onClick={() => {
+                setLeftTab("replay");
+                setLeftDrawerOpen(true);
+              }}
+              className="p-2 rounded opacity-70 hover:opacity-100 cursor-pointer relative"
+              title={`Time Replay (${replayStatus})`}
+            >
+              <Clock className="w-4 h-4 text-purple-500" />
+              {replayStatus === "RUNNING" && (
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse absolute top-1 right-1" />
+              )}
+            </button>
+          </aside>
+        )}
+
+        {/* CENTER: Graph Canvas OR Evaluation Benchmark Dashboard */}
+        <main className="flex-1 relative flex flex-col overflow-hidden">
+          {evaluationMode ? (
+            /* EVALUATION MODE DASHBOARD */
+            <div className="flex-1 p-6 overflow-y-auto space-y-5">
+              <div
+                className={`flex items-center justify-between border-b pb-3 ${
+                  isDark ? "border-slate-800" : "border-slate-200"
+                }`}
+              >
+                <div>
+                  <h2 className="text-lg font-bold flex items-center gap-2">
+                    <ShieldCheck className="w-5 h-5 text-purple-500" />
+                    Capability 2: Evaluation Mode & Benchmark
+                  </h2>
+                  <p className="text-xs opacity-75 mt-0.5">
+                    Evaluates multi-signal persona attribution against historical ground truth (
+                    <code className="text-purple-400 font-mono">user-matching.tsv</code>).
+                  </p>
+                </div>
+
+                <div
+                  className={`border rounded p-0.5 flex text-xs ${
+                    isDark ? "bg-slate-900 border-slate-800" : "bg-slate-100 border-slate-200"
+                  }`}
+                >
+                  <button
+                    onClick={() => setEvalActiveTab("benchmark")}
+                    className={`px-3 py-1 rounded font-medium transition-colors cursor-pointer ${
+                      evalActiveTab === "benchmark"
+                        ? "bg-purple-600 text-white"
+                        : "opacity-60 hover:opacity-100"
+                    }`}
+                  >
+                    Benchmark Metrics
+                  </button>
+                  <button
+                    onClick={() => setEvalActiveTab("reference")}
+                    className={`px-3 py-1 rounded font-medium transition-colors cursor-pointer ${
+                      evalActiveTab === "reference"
+                        ? "bg-purple-600 text-white"
+                        : "opacity-60 hover:opacity-100"
+                    }`}
+                  >
+                    Ground Truth Catalog
+                  </button>
                 </div>
               </div>
 
               {evalActiveTab === "benchmark" ? (
                 <div className="space-y-5">
                   {/* Threshold Control Bar */}
-                  <div className="bg-slate-900/60 border border-slate-800 rounded-lg p-3.5 flex items-center justify-between">
+                  <div
+                    className={`border rounded-xl p-4 flex items-center justify-between shadow-xs ${
+                      isDark ? "bg-slate-900/60 border-slate-800" : "bg-white border-slate-200"
+                    }`}
+                  >
                     <div className="flex items-center gap-3">
-                      <Target className="w-4 h-4 text-cyan-400" />
+                      <Target className="w-5 h-5 text-cyan-500" />
                       <div>
-                        <div className="text-xs font-semibold text-slate-200">
+                        <div className="text-xs font-semibold">
                           Confidence Score Threshold (τ):{" "}
-                          <span className="text-cyan-400 font-mono">
+                          <span className="text-cyan-500 font-mono font-bold">
                             {benchmarkThreshold}%
                           </span>
                         </div>
-                        <div className="text-[11px] text-slate-400">
-                          Predictions with attribution score ≥ τ are counted as
-                          predicted matches.
+                        <div className="text-[11px] opacity-70">
+                          Attribution hypotheses with score ≥ τ are evaluated as predicted positives.
                         </div>
                       </div>
                     </div>
@@ -667,8 +938,8 @@ export default function Workspace({ caseData, onBack }) {
                     <div className="flex items-center gap-3">
                       <input
                         type="range"
-                        min="5"
-                        max="85"
+                        min="0"
+                        max="100"
                         step="5"
                         value={benchmarkThreshold}
                         onChange={(e) => {
@@ -676,12 +947,12 @@ export default function Workspace({ caseData, onBack }) {
                           setBenchmarkThreshold(val);
                           loadBenchmark(val);
                         }}
-                        className="w-44 accent-cyan-500 cursor-pointer"
+                        className="w-48 accent-cyan-500 cursor-pointer"
                       />
                       <button
                         onClick={() => loadBenchmark(benchmarkThreshold)}
                         disabled={loadingBenchmark}
-                        className="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1 rounded transition-colors font-medium cursor-pointer"
+                        className="text-xs bg-purple-600 hover:bg-purple-500 text-white px-3.5 py-1.5 rounded-md font-medium transition-colors cursor-pointer"
                       >
                         {loadingBenchmark ? "Calculating..." : "Re-evaluate"}
                       </button>
@@ -691,166 +962,120 @@ export default function Workspace({ caseData, onBack }) {
                   {/* Benchmark KPI Cards */}
                   {benchmarkData && (
                     <div className="grid grid-cols-4 gap-4">
-                      <div className="bg-slate-900/80 border border-slate-800 rounded-lg p-4">
-                        <div className="text-xs text-slate-400 font-medium">
-                          Precision
-                        </div>
-                        <div className="text-2xl font-bold text-emerald-400 mt-1">
+                      <div
+                        className={`border rounded-xl p-4 ${
+                          isDark ? "bg-slate-900/70 border-slate-800" : "bg-white border-slate-200 shadow-2xs"
+                        }`}
+                      >
+                        <div className="text-xs opacity-75 font-medium">Precision</div>
+                        <div className="text-2xl font-bold text-emerald-500 mt-1">
                           {benchmarkData.metrics?.precision_percent}%
                         </div>
-                        <div className="text-[11px] text-slate-500 mt-1">
-                          TP / (TP + FP) ={" "}
-                          {benchmarkData.metrics?.true_positives} /{" "}
-                          {benchmarkData.metrics?.true_positives +
-                            benchmarkData.metrics?.false_positives}
+                        <div className="text-[11px] opacity-60 font-mono mt-0.5">
+                          TP / (TP + FP) = {benchmarkData.metrics?.true_positives} /{" "}
+                          {(benchmarkData.metrics?.true_positives || 0) +
+                            (benchmarkData.metrics?.false_positives || 0)}
                         </div>
                       </div>
 
-                      <div className="bg-slate-900/80 border border-slate-800 rounded-lg p-4">
-                        <div className="text-xs text-slate-400 font-medium">
-                          Recall
-                        </div>
-                        <div className="text-2xl font-bold text-cyan-400 mt-1">
+                      <div
+                        className={`border rounded-xl p-4 ${
+                          isDark ? "bg-slate-900/70 border-slate-800" : "bg-white border-slate-200 shadow-2xs"
+                        }`}
+                      >
+                        <div className="text-xs opacity-75 font-medium">Recall</div>
+                        <div className="text-2xl font-bold text-cyan-500 mt-1">
                           {benchmarkData.metrics?.recall_percent}%
                         </div>
-                        <div className="text-[11px] text-slate-500 mt-1">
-                          TP / (TP + FN) ={" "}
-                          {benchmarkData.metrics?.true_positives} /{" "}
-                          {benchmarkData.metrics?.total_case_ground_truth}
+                        <div className="text-[11px] opacity-60 font-mono mt-0.5">
+                          TP / (TP + FN) = {benchmarkData.metrics?.true_positives} /{" "}
+                          {(benchmarkData.metrics?.true_positives || 0) +
+                            (benchmarkData.metrics?.false_negatives || 0)}
                         </div>
                       </div>
 
-                      <div className="bg-slate-900/80 border border-slate-800 rounded-lg p-4">
-                        <div className="text-xs text-slate-400 font-medium">
-                          F1 Score
-                        </div>
-                        <div className="text-2xl font-bold text-purple-400 mt-1">
+                      <div
+                        className={`border rounded-xl p-4 ${
+                          isDark ? "bg-slate-900/70 border-slate-800" : "bg-white border-slate-200 shadow-2xs"
+                        }`}
+                      >
+                        <div className="text-xs opacity-75 font-medium">F1 Score</div>
+                        <div className="text-2xl font-bold text-purple-500 mt-1">
                           {benchmarkData.metrics?.f1_score}
                         </div>
-                        <div className="text-[11px] text-slate-500 mt-1">
-                          Harmonic mean of P & R
-                        </div>
+                        <div className="text-[11px] opacity-60 mt-0.5">Harmonic mean of P & R</div>
                       </div>
 
-                      <div className="bg-slate-900/80 border border-slate-800 rounded-lg p-4">
-                        <div className="text-xs text-slate-400 font-medium">
-                          Contingency
-                        </div>
-                        <div className="text-xs text-slate-200 mt-1.5 space-y-1 font-mono">
-                          <div className="flex justify-between">
-                            <span className="text-emerald-400">TP:</span>
-                            <span>{benchmarkData.metrics?.true_positives}</span>
+                      <div
+                        className={`border rounded-xl p-4 ${
+                          isDark ? "bg-slate-900/70 border-slate-800" : "bg-white border-slate-200 shadow-2xs"
+                        }`}
+                      >
+                        <div className="text-xs opacity-75 font-medium">Contingency</div>
+                        <div className="text-xs font-mono mt-1.5 space-y-0.5">
+                          <div className="text-emerald-500 flex justify-between">
+                            <span>TP (Verified):</span> <strong>{benchmarkData.metrics?.true_positives}</strong>
                           </div>
-                          <div className="flex justify-between">
-                            <span className="text-amber-400">FP:</span>
-                            <span>
-                              {benchmarkData.metrics?.false_positives}
-                            </span>
+                          <div className="text-amber-500 flex justify-between">
+                            <span>FP (Mistakes):</span> <strong>{benchmarkData.metrics?.false_positives}</strong>
                           </div>
-                          <div className="flex justify-between">
-                            <span className="text-rose-400">FN:</span>
-                            <span>
-                              {benchmarkData.metrics?.false_negatives}
-                            </span>
+                          <div className="text-rose-500 flex justify-between">
+                            <span>FN (Missed):</span> <strong>{benchmarkData.metrics?.false_negatives}</strong>
                           </div>
                         </div>
                       </div>
                     </div>
                   )}
 
-                  {/* True Positive Matches Table */}
+                  {/* Confirmed Matches Table */}
                   {benchmarkData?.true_positive_predictions?.length > 0 && (
                     <div>
-                      <h3 className="text-xs font-semibold text-slate-300 mb-2 flex items-center gap-1.5">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                        Verified Ground Truth Attributions (True Positives)
+                      <h3 className="text-xs font-semibold mb-2 flex items-center gap-1.5">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                        True Positive Predictions (Attribution Confirmed by Ground Truth)
                       </h3>
-                      <div className="border border-slate-800 rounded-lg overflow-hidden">
+                      <div
+                        className={`border rounded-xl overflow-hidden ${
+                          isDark ? "border-slate-800" : "border-slate-200"
+                        }`}
+                      >
                         <table className="w-full text-xs text-left">
-                          <thead className="bg-slate-900 text-slate-400 border-b border-slate-800 font-medium">
+                          <thead
+                            className={`border-b font-medium ${
+                              isDark ? "bg-slate-900 text-slate-400 border-slate-800" : "bg-slate-100 text-slate-600 border-slate-200"
+                            }`}
+                          >
                             <tr>
                               <th className="p-2.5">Forum Persona</th>
                               <th className="p-2.5">Market Persona</th>
-                              <th className="p-2.5">UID \u2194 VID</th>
+                              <th className="p-2.5">Pairing (UID ↔ VID)</th>
                               <th className="p-2.5">Attribution Score</th>
-                              <th className="p-2.5">Ground Truth Match</th>
+                              <th className="p-2.5">Status</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-slate-800/60 font-mono text-slate-300">
-                            {benchmarkData.true_positive_predictions.map(
-                              (p, idx) => (
-                                <tr
-                                  key={idx}
-                                  className="hover:bg-slate-900/40 transition-colors"
-                                >
-                                  <td className="p-2.5 font-semibold text-cyan-400">
-                                    {p.forum_handle}
-                                  </td>
-                                  <td className="p-2.5 font-semibold text-purple-400">
-                                    {p.market_handle}
-                                  </td>
-                                  <td className="p-2.5 text-slate-400">
-                                    {p.forum_uid} \u2194 {p.market_vid}
-                                  </td>
-                                  <td className="p-2.5 text-emerald-300 font-bold">
-                                    {p.score}%
-                                  </td>
-                                  <td className="p-2.5">
-                                    <span className="text-[10px] bg-emerald-900/30 text-emerald-400 border border-emerald-800 px-2 py-0.5 rounded font-sans">
-                                      CONFIRMED MATCH
-                                    </span>
-                                  </td>
-                                </tr>
-                              ),
-                            )}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* False Positive Predictions Table */}
-                  {benchmarkData?.false_positive_predictions?.length > 0 && (
-                    <div>
-                      <h3 className="text-xs font-semibold text-slate-300 mb-2 flex items-center gap-1.5">
-                        <AlertCircle className="w-4 h-4 text-amber-400" />
-                        Candidate Hypotheses Exceeding Threshold (Unverified /
-                        Negative)
-                      </h3>
-                      <div className="border border-slate-800 rounded-lg overflow-hidden">
-                        <table className="w-full text-xs text-left">
-                          <thead className="bg-slate-900 text-slate-400 border-b border-slate-800 font-medium">
-                            <tr>
-                              <th className="p-2.5">Forum Persona</th>
-                              <th className="p-2.5">Market Persona</th>
-                              <th className="p-2.5">Attribution Score</th>
-                              <th className="p-2.5">Classification</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-slate-800/60 font-mono text-slate-300">
-                            {benchmarkData.false_positive_predictions.map(
-                              (p, idx) => (
-                                <tr
-                                  key={idx}
-                                  className="hover:bg-slate-900/40 transition-colors"
-                                >
-                                  <td className="p-2.5 font-semibold text-cyan-400">
-                                    {p.forum_handle}
-                                  </td>
-                                  <td className="p-2.5 font-semibold text-purple-400">
-                                    {p.market_handle}
-                                  </td>
-                                  <td className="p-2.5 text-amber-300 font-bold">
-                                    {p.score}%
-                                  </td>
-                                  <td className="p-2.5">
-                                    <span className="text-[10px] bg-amber-900/30 text-amber-400 border border-amber-800 px-2 py-0.5 rounded font-sans">
-                                      FALSE POSITIVE (THRESHOLD EXCEEDED)
-                                    </span>
-                                  </td>
-                                </tr>
-                              ),
-                            )}
+                          <tbody
+                            className={`divide-y font-mono ${
+                              isDark ? "divide-slate-800/60" : "divide-slate-200"
+                            }`}
+                          >
+                            {benchmarkData.true_positive_predictions.map((p, idx) => (
+                              <tr
+                                key={idx}
+                                className={isDark ? "hover:bg-slate-900/40" : "hover:bg-slate-50"}
+                              >
+                                <td className="p-2.5 font-semibold text-cyan-500">{p.forum_handle}</td>
+                                <td className="p-2.5 font-semibold text-purple-500">{p.market_handle}</td>
+                                <td className="p-2.5 opacity-75">
+                                  {p.forum_uid} ↔ {p.market_vid}
+                                </td>
+                                <td className="p-2.5 text-emerald-500 font-bold">{p.score}%</td>
+                                <td className="p-2.5">
+                                  <span className="text-[10px] bg-emerald-500/20 text-emerald-500 border border-emerald-500/40 px-2 py-0.5 rounded font-sans font-semibold">
+                                    CONFIRMED MATCH
+                                  </span>
+                                </td>
+                              </tr>
+                            ))}
                           </tbody>
                         </table>
                       </div>
@@ -858,54 +1083,51 @@ export default function Workspace({ caseData, onBack }) {
                   )}
                 </div>
               ) : (
-                /* Reference Ground Truth Table */
+                /* Ground Truth Reference Catalog */
                 <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-xs text-slate-400">
-                      Unrevealed ground truth matches from{" "}
-                      <code className="text-purple-300">user-matching.tsv</code>
-                    </span>
-                    <span className="text-xs bg-slate-900 border border-slate-800 px-2.5 py-0.5 rounded text-slate-300">
-                      Total available:{" "}
-                      <strong className="text-purple-300">
-                        {groundTruthData?.total_reference_matches_available}
-                      </strong>
-                    </span>
-                  </div>
-                  <div className="overflow-x-auto border border-slate-800 rounded-lg">
+                  <h3 className="text-xs font-semibold mb-2">
+                    Verified Evolution Forum ↔ Market Ground Truth Archive
+                  </h3>
+                  <div
+                    className={`border rounded-xl overflow-hidden ${
+                      isDark ? "border-slate-800" : "border-slate-200"
+                    }`}
+                  >
                     <table className="w-full text-xs text-left">
-                      <thead className="bg-slate-900 text-slate-400 border-b border-slate-800">
+                      <thead
+                        className={`border-b font-medium ${
+                          isDark ? "bg-slate-900 text-slate-400 border-slate-800" : "bg-slate-100 text-slate-600 border-slate-200"
+                        }`}
+                      >
                         <tr>
-                          <th className="p-2.5">Match ID</th>
-                          <th className="p-2.5">Verified Username</th>
+                          <th className="p-2.5">ID</th>
+                          <th className="p-2.5">Username</th>
                           <th className="p-2.5">Forum UID</th>
                           <th className="p-2.5">Market VID</th>
-                          <th className="p-2.5">Evaluation Status</th>
+                          <th className="p-2.5">Provenance</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-800/60 font-mono text-slate-300">
-                        {groundTruthData?.sample_reference_matches?.map(
-                          (m, idx) => (
-                            <tr
-                              key={idx}
-                              className="hover:bg-slate-900/40 transition-colors"
-                            >
-                              <td className="p-2.5 text-slate-500">
-                                #{m.match_id}
-                              </td>
-                              <td className="p-2.5 font-semibold text-cyan-400">
-                                {m.username}
-                              </td>
-                              <td className="p-2.5">{m.uid}</td>
-                              <td className="p-2.5">{m.vid}</td>
-                              <td className="p-2.5">
-                                <span className="text-[10px] bg-purple-900/30 text-purple-300 border border-purple-800 px-2 py-0.5 rounded font-sans">
-                                  UNREVEALED_REFERENCE
-                                </span>
-                              </td>
-                            </tr>
-                          ),
-                        )}
+                      <tbody
+                        className={`divide-y font-mono ${
+                          isDark ? "divide-slate-800/60" : "divide-slate-200"
+                        }`}
+                      >
+                        {groundTruthData?.matches?.map((m, idx) => (
+                          <tr
+                            key={idx}
+                            className={isDark ? "hover:bg-slate-900/40" : "hover:bg-slate-50"}
+                          >
+                            <td className="p-2.5 opacity-60">#{m.match_id}</td>
+                            <td className="p-2.5 font-semibold text-purple-500">{m.username}</td>
+                            <td className="p-2.5">{m.uid}</td>
+                            <td className="p-2.5">{m.vid}</td>
+                            <td className="p-2.5">
+                              <span className="text-[10px] bg-purple-500/20 text-purple-500 border border-purple-500/40 px-2 py-0.5 rounded font-sans">
+                                UNREVEALED_REFERENCE
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
                       </tbody>
                     </table>
                   </div>
@@ -913,199 +1135,168 @@ export default function Workspace({ caseData, onBack }) {
               )}
             </div>
           ) : (
-            <div className="flex-1 relative">
+            /* INTERACTIVE GRAPH CANVAS */
+            <div className="flex-1 w-full h-full relative">
               <GraphCanvas
                 elements={graphData}
+                theme={theme}
                 onNodeSelect={(node) => {
                   setSelectedNode(node);
                   setSelectedEdge(null);
+                  if (node) setRightDrawerOpen(true);
                 }}
                 onEdgeSelect={(edge) => {
                   setSelectedEdge(edge);
                   setSelectedNode(null);
+                  if (edge) setRightDrawerOpen(true);
                 }}
               />
             </div>
           )}
         </main>
 
-        {/* RIGHT SIDEBAR: Inspector (Node or Correlation Edge) */}
-        <aside className="w-80 border-l border-slate-800 bg-slate-900/50 flex flex-col">
-          <div className="p-4 border-b border-slate-800 flex justify-between items-center">
-            <h2 className="font-medium text-slate-300 text-sm">
-              {selectedEdge ? "Relationship Inspector" : "Forensic Inspector"}
-            </h2>
-            {selectedNode && (
-              <span className="text-[10px] text-slate-500 font-mono">
-                {selectedNode.id?.substring(0, 16)}...
-              </span>
-            )}
-            {selectedEdge && (
-              <span className="text-[10px] text-pink-400 font-mono">
-                {selectedEdge.label}
-              </span>
-            )}
-          </div>
-          <div className="flex-1 overflow-y-auto p-4">
-            {selectedEdge &&
-            (selectedEdge.label === "CORRELATED_WITH" ||
-              selectedEdge.score !== undefined) ? (
-              <CorrelationInspector
-                correlationEdge={selectedEdge}
-                caseId={caseData.case_id}
-                onCorrelationUpdated={loadData}
-              />
-            ) : (
-              <NodeInspector node={selectedNode} caseId={caseData.case_id} />
-            )}
-          </div>
-        </aside>
+        {/* RIGHT DRAWER: FORENSIC / RELATIONSHIP INSPECTOR */}
+        {rightDrawerOpen ? (
+          <aside
+            className={`w-[340px] border-l flex flex-col shrink-0 transition-all duration-200 z-10 ${
+              isDark ? "bg-slate-900/70 border-slate-800" : "bg-white border-slate-200 shadow-sm"
+            }`}
+          >
+            <div
+              className={`p-3 border-b flex justify-between items-center ${
+                isDark ? "border-slate-800 bg-slate-950/60" : "border-slate-200 bg-slate-50"
+              }`}
+            >
+              <h2 className="font-semibold text-xs uppercase tracking-wider opacity-80 flex items-center gap-1.5">
+                <Target className="w-4 h-4 text-cyan-500" />
+                {selectedEdge ? "Relationship Inspector" : "Forensic Inspector"}
+              </h2>
+
+              <button
+                onClick={() => setRightDrawerOpen(false)}
+                className="p-1 rounded opacity-60 hover:opacity-100 transition-opacity cursor-pointer"
+                title="Collapse Inspector"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-4">
+              {selectedEdge && (
+                <CorrelationInspector
+                  relationship={selectedEdge}
+                  caseId={caseData.case_id}
+                  onEvidenceUpdated={loadData}
+                />
+              )}
+
+              {!selectedEdge && (
+                <NodeInspector node={selectedNode} caseId={caseData.case_id} />
+              )}
+            </div>
+          </aside>
+        ) : (
+          /* Collapsed Right Tab Button */
+          <button
+            onClick={() => setRightDrawerOpen(true)}
+            className={`absolute right-0 top-1/2 -translate-y-1/2 z-20 py-3 px-1.5 rounded-l-lg border-y border-l shadow-xl flex items-center gap-1 cursor-pointer transition-colors ${
+              isDark
+                ? "bg-slate-900 border-slate-700 text-slate-300 hover:text-white"
+                : "bg-white border-slate-300 text-slate-700 hover:text-slate-950"
+            }`}
+            title="Expand Forensic Inspector"
+          >
+            <ChevronLeft className="w-4 h-4 text-cyan-500" />
+            <span className="text-[10px] font-semibold uppercase tracking-wider [writing-mode:vertical-lr] rotate-180">
+              Inspector
+            </span>
+          </button>
+        )}
       </div>
 
-      {/* Coordinated Activity Modal */}
+      {/* COORDINATED ACTIVITY MODAL */}
       {showCoordModal && coordResults && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-          <div className="bg-slate-900 border border-slate-700 rounded-lg max-w-3xl w-full max-h-[85vh] flex flex-col shadow-2xl">
-            <div className="p-4 border-b border-slate-800 flex items-center justify-between">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div
+            className={`border rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl ${
+              isDark ? "bg-slate-900 border-slate-700 text-slate-200" : "bg-white border-slate-200 text-slate-800"
+            }`}
+          >
+            <div
+              className={`p-4 border-b flex items-center justify-between ${
+                isDark ? "border-slate-800" : "border-slate-200"
+              }`}
+            >
               <div className="flex items-center gap-2">
-                <Users className="w-5 h-5 text-cyan-400" />
-                <h3 className="font-semibold text-slate-200 text-sm">
-                  Capability 3: Coordinated Activity Discovery
-                </h3>
-                <span className="text-[10px] bg-cyan-900/40 text-cyan-300 border border-cyan-800 px-2 py-0.5 rounded font-mono">
-                  DERIVED PROVENANCE
-                </span>
+                <Users className="w-5 h-5 text-cyan-500" />
+                <h3 className="font-bold text-sm">Capability 3: Coordinated Activity Analysis</h3>
               </div>
               <button
                 onClick={() => setShowCoordModal(false)}
-                className="text-slate-400 hover:text-slate-200 p-1 rounded"
+                className="p-1 rounded opacity-60 hover:opacity-100 cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="p-4 overflow-y-auto space-y-4 flex-1">
-              <div className="grid grid-cols-3 gap-3">
-                <div className="bg-slate-950/60 border border-slate-800 rounded p-3 text-center">
-                  <div className="text-xl font-bold text-cyan-400">
-                    {coordResults.pairs_analyzed || 0}
-                  </div>
-                  <div className="text-[11px] text-slate-400">
-                    Interaction Pairs
-                  </div>
-                </div>
-                <div className="bg-slate-950/60 border border-slate-800 rounded p-3 text-center">
-                  <div className="text-xl font-bold text-purple-400">
-                    {coordResults.coordination_clusters?.length || 0}
-                  </div>
-                  <div className="text-[11px] text-slate-400">
-                    Operation Clusters
+            <div className="p-5 overflow-y-auto space-y-4 text-xs">
+              <div
+                className={`p-3.5 rounded-xl border flex items-center justify-between ${
+                  isDark ? "bg-slate-950 border-slate-800" : "bg-slate-50 border-slate-200"
+                }`}
+              >
+                <div>
+                  <div className="text-[11px] opacity-60">Coordinated Pairs Detected</div>
+                  <div className="text-xl font-bold text-cyan-500 mt-0.5">
+                    {coordResults.coordinated_pairs_count}
                   </div>
                 </div>
-                <div className="bg-slate-950/60 border border-slate-800 rounded p-3 text-center">
-                  <div className="text-xl font-bold text-pink-400">
-                    {coordResults.top_coordinated_pairs?.filter(
-                      (p) => p.coordination_score >= 60,
-                    ).length || 0}
-                  </div>
-                  <div className="text-[11px] text-slate-400">
-                    High Synchrony Pairs
+                <div>
+                  <div className="text-[11px] opacity-60">Graph Links Added</div>
+                  <div className="text-xl font-bold text-purple-500 mt-0.5">
+                    {coordResults.coordination_links_added}
                   </div>
                 </div>
               </div>
 
-              {/* Clusters List */}
-              {coordResults.coordination_clusters?.length > 0 && (
-                <div>
-                  <h4 className="text-xs font-semibold text-slate-300 mb-2 uppercase tracking-wide">
-                    Identified Coordination Groups
-                  </h4>
-                  <div className="space-y-2">
-                    {coordResults.coordination_clusters.map((c) => (
-                      <div
-                        key={c.cluster_id}
-                        className="bg-slate-950/50 border border-slate-800 rounded p-3 flex items-center justify-between"
-                      >
-                        <div>
-                          <div className="text-xs font-medium text-cyan-300">
-                            {c.name}
-                          </div>
-                          <div className="text-[11px] text-slate-400 mt-1 flex flex-wrap gap-1">
-                            Members:{" "}
-                            {c.members.map((m) => (
-                              <span
-                                key={m}
-                                className="bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-mono"
-                              >
-                                {m}
-                              </span>
-                            ))}
-                          </div>
+              <div className="space-y-2">
+                <div className="font-semibold opacity-80">Top Coordinated Persona Pairs</div>
+                <div className="space-y-1.5 max-h-60 overflow-y-auto">
+                  {coordResults.top_coordinated_pairs?.map((cp, idx) => (
+                    <div
+                      key={idx}
+                      className={`p-2.5 rounded-lg border flex items-center justify-between ${
+                        isDark ? "bg-slate-950/70 border-slate-800" : "bg-slate-50 border-slate-200"
+                      }`}
+                    >
+                      <div>
+                        <div className="font-semibold text-cyan-500">
+                          {cp.source} ↔ {cp.target}
                         </div>
-                        <div className="text-right">
-                          <span className="text-[10px] bg-purple-900/40 text-purple-300 border border-purple-800 px-2 py-0.5 rounded">
-                            Density {c.density}
-                          </span>
+                        <div className="text-[10px] opacity-60 mt-0.5">
+                          Pattern: {cp.pattern?.replace(/_/g, " ")} | Co-posts: {cp.co_posts}
                         </div>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Pairs Table */}
-              <div>
-                <h4 className="text-xs font-semibold text-slate-300 mb-2 uppercase tracking-wide">
-                  Top Coordinated Persona Pairs
-                </h4>
-                <div className="border border-slate-800 rounded overflow-hidden">
-                  <table className="w-full text-left text-xs">
-                    <thead className="bg-slate-950/80 text-slate-400 border-b border-slate-800 font-medium">
-                      <tr>
-                        <th className="p-2.5">Personas</th>
-                        <th className="p-2.5">Pattern</th>
-                        <th className="p-2.5">Interactions</th>
-                        <th className="p-2.5">Avg Latency</th>
-                        <th className="p-2.5 text-right">Coordination Score</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-800/60 font-mono text-slate-300">
-                      {coordResults.top_coordinated_pairs
-                        ?.slice(0, 10)
-                        .map((pair, idx) => (
-                          <tr
-                            key={idx}
-                            className="hover:bg-slate-800/30 transition-colors"
-                          >
-                            <td className="p-2.5 font-semibold text-cyan-400">
-                              {pair.source_handle} ↔ {pair.target_handle}
-                            </td>
-                            <td className="p-2.5">
-                              <span className="text-[10px] bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded">
-                                {pair.pattern}
-                              </span>
-                            </td>
-                            <td className="p-2.5">{pair.interaction_count}</td>
-                            <td className="p-2.5">
-                              {pair.avg_response_latency_sec}s
-                            </td>
-                            <td className="p-2.5 text-right font-bold text-cyan-300">
-                              {pair.coordination_score}%
-                            </td>
-                          </tr>
-                        ))}
-                    </tbody>
-                  </table>
+                      <div className="text-right">
+                        <div className="font-bold text-cyan-500">{cp.coordination_score}%</div>
+                        <div className="text-[10px] opacity-60">Avg Δt: {cp.avg_latency_sec}s</div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
 
-            <div className="p-3 border-t border-slate-800 bg-slate-950/40 flex justify-end">
+            <div
+              className={`p-3 border-t flex justify-end ${
+                isDark ? "border-slate-800" : "border-slate-200"
+              }`}
+            >
               <button
                 onClick={() => setShowCoordModal(false)}
-                className="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-1.5 rounded transition-colors font-medium"
+                className="px-4 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded-md font-medium text-xs cursor-pointer shadow-xs"
               >
-                Close & Return to Graph
+                Close Analysis
               </button>
             </div>
           </div>
