@@ -1225,7 +1225,11 @@ export default function Workspace({
                         Verified Evolution Forum ↔ Market Ground Truth Archive
                       </h3>
                       <p className="text-[11px] opacity-70">
-                        Historical ground truth pairings from <code className="text-purple-400 font-mono">user-matching.tsv</code> used to score attribution precision and recall.
+                        Historical ground truth pairings from{" "}
+                        <code className="text-purple-400 font-mono">
+                          user-matching.tsv
+                        </code>{" "}
+                        used to score attribution precision and recall.
                       </p>
                     </div>
 
@@ -1242,7 +1246,9 @@ export default function Workspace({
                         <RefreshCw
                           className={`w-3.5 h-3.5 text-purple-500 ${loadingGroundTruth ? "animate-spin" : ""}`}
                         />
-                        <span>{loadingGroundTruth ? "Loading..." : "Reload Archive"}</span>
+                        <span>
+                          {loadingGroundTruth ? "Loading..." : "Reload Archive"}
+                        </span>
                       </button>
                     </div>
                   </div>
@@ -1274,7 +1280,8 @@ export default function Workspace({
                           if (!groundTruthSearch.trim()) return true;
                           const q = groundTruthSearch.toLowerCase().trim();
                           return (
-                            (m.username && m.username.toLowerCase().includes(q)) ||
+                            (m.username &&
+                              m.username.toLowerCase().includes(q)) ||
                             String(m.uid).includes(q) ||
                             String(m.vid).includes(q) ||
                             String(m.match_id).includes(q)
@@ -1307,7 +1314,8 @@ export default function Workspace({
                         <div className="p-8 text-center border rounded-xl flex flex-col items-center justify-center gap-2">
                           <RefreshCw className="w-6 h-6 animate-spin text-purple-500" />
                           <span className="text-xs opacity-70">
-                            Loading verified ground-truth archive from database...
+                            Loading verified ground-truth archive from
+                            database...
                           </span>
                         </div>
                       );
@@ -1317,14 +1325,23 @@ export default function Workspace({
                       return (
                         <div
                           className={`p-8 text-center border rounded-xl flex flex-col items-center justify-center gap-3 ${
-                            isDark ? "border-slate-800 bg-slate-900/40" : "border-slate-200 bg-slate-50"
+                            isDark
+                              ? "border-slate-800 bg-slate-900/40"
+                              : "border-slate-200 bg-slate-50"
                           }`}
                         >
                           <Database className="w-8 h-8 text-purple-500/60" />
                           <div>
-                            <div className="text-xs font-semibold">No Ground Truth Records Loaded</div>
+                            <div className="text-xs font-semibold">
+                              No Ground Truth Records Loaded
+                            </div>
                             <p className="text-[11px] opacity-70 mt-0.5">
-                              Click below to read and cache verified pairings from <code>dataset/forum-market/user-matching.tsv</code>.
+                              Click below to read and cache verified pairings
+                              from{" "}
+                              <code>
+                                dataset/forum-market/user-matching.tsv
+                              </code>
+                              .
                             </p>
                           </div>
                           <button
@@ -1341,7 +1358,9 @@ export default function Workspace({
                     return (
                       <div
                         className={`border rounded-xl overflow-hidden max-h-[60vh] overflow-y-auto ${
-                          isDark ? "border-slate-800" : "border-slate-200 shadow-2xs"
+                          isDark
+                            ? "border-slate-800"
+                            : "border-slate-200 shadow-2xs"
                         }`}
                       >
                         <table className="w-full text-xs text-left">
@@ -1362,7 +1381,9 @@ export default function Workspace({
                           </thead>
                           <tbody
                             className={`divide-y font-mono ${
-                              isDark ? "divide-slate-800/60" : "divide-slate-200"
+                              isDark
+                                ? "divide-slate-800/60"
+                                : "divide-slate-200"
                             }`}
                           >
                             {filtered.map((m, idx) => (
@@ -1374,7 +1395,9 @@ export default function Workspace({
                                     : "hover:bg-slate-50"
                                 }
                               >
-                                <td className="p-2.5 opacity-60">#{m.match_id}</td>
+                                <td className="p-2.5 opacity-60">
+                                  #{m.match_id}
+                                </td>
                                 <td className="p-2.5 font-semibold text-purple-500">
                                   {m.username}
                                 </td>
